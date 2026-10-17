@@ -22,10 +22,19 @@ All pages listed above; honest copy with no fabricated proof points; only the tw
 - SEO metadata, sitemap.xml, robots.txt, favicon.svg, .env.example, DEPLOYMENT.md (cost-conscious guidance, Zoho notes, unresolved legal/config items).
 - Verified: API curls (health, contact, careers all 200, notified true); screenshots at 375/768/1366; contact form e2e flow through UI; service detail and article pages.
 
+## Implemented (2026-10-17, iteration 2)
+- Replaced the placeholder logo with the user-supplied brand: arch+dot+ring mark recreated as SVG for dark UI (header/footer/admin), supplied PNG used as favicon/apple-touch icon and stored in public/brand/; wordmark subline now "SYSTEMS INC."; footer copyright "AUTRAXIS Systems Inc."
+- Admin submissions inbox: JWT auth (seeded admin, brute-force lockout), /admin sign-in, /admin/inbox with Inquiries/Applications tabs, expand-to-read, read/unread toggles, sign out. Tested: login, me, submissions list, read toggle, 401s for unauthenticated/wrong-password.
+- Privacy-friendly analytics: cookieless/IP-less pageview counter (POST /api/analytics/pageview), admin Analytics tab with 30-day totals, 14-day bars, top pages. Privacy policy updated to disclose it.
+- Blueprint walkthrough pages: /projects/:slug for all three demonstrations — custom flow diagram, sample payloads, three-part walkthrough narrative, highlights, CTA. Each clearly labeled "Demonstration blueprint — not a client engagement".
+- Share card: generated public/og-image.png (1200×630, navy + grid + mark + tagline), og:image + twitter summary_large_image tags in index.html.
+- Copy de-duplication: removed repeated "illustrative" wording (kept single, meaningful disclaimers per context); fixed diagram label overlap in walkthrough diagrams; added project detail URLs to sitemap.
+- Verification: curl chain for all new endpoints (login → me → submissions → analytics, 401 negatives); browser-tested admin sign-in → inbox → expand → analytics tab; walkthrough page screenshot; OG image visually inspected; mobile 375px re-checked.
+
 ## Prioritized backlog
-- P0: Legal counsel review of Privacy/Terms (flagged on-page). Deploy + DNS for autraxis.com (owner action at registrar). Confirm careers inbox monitoring; confirm role listings are real.
-- P1: Admin view or export for form submissions (currently DB-only). CAPTCHA if spam appears. OG share image asset.
-- P2: Analytics (privacy-friendly) + privacy policy update. More insights articles. Case-study section when real, permissioned client work exists.
+- P0: Legal counsel review of Privacy/Terms. Deploy + DNS for autraxis.com (owner action). Confirm careers inbox monitoring; confirm role listings are real. Change admin password on first use via env update.
+- P1: Delete/export submissions from admin UI. CAPTCHA if spam appears. Change-password flow for admin (currently env-managed).
+- P2: More insights articles and blueprints. Case-study section when real, permissioned client work exists.
 
 ## Next tasks
 1. Deploy via Emergent, attach autraxis.com, set production CORS_ORIGINS.

@@ -77,7 +77,7 @@ const Home = () => {
         >
           <NetworkDiagram interactive />
           <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500">
-            Illustrative architecture — select a node to inspect its payload
+            Reference architecture — select any node to inspect a payload
           </p>
         </motion.div>
       </section>

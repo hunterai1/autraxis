@@ -9,7 +9,7 @@ const SECTIONS = [
   },
   {
     h: "2. What we collect",
-    p: "When you submit the contact or careers form, we collect the details you provide: name, email address, company (optional), the topic or role selected, and your message. We do not run advertising trackers on this site and we do not sell personal data to anyone.",
+    p: "When you submit the contact or careers form, we collect the details you provide: name, email address, company (optional), the topic or role selected, and your message. We do not run advertising trackers on this site and we do not sell personal data to anyone. We also record simple, anonymous pageview counts (page path and date only — no cookies, no IP addresses, no cross-site tracking) to understand which pages are useful.",
   },
   {
     h: "3. Why we collect it",

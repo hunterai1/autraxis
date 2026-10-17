@@ -81,13 +81,16 @@ const Footer = () => (
       </div>
 
       <div className="mt-14 pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <p className="text-xs text-slate-500">© {new Date().getFullYear()} AUTRAXIS. All rights reserved.</p>
+        <p className="text-xs text-slate-500">© {new Date().getFullYear()} AUTRAXIS Systems Inc. All rights reserved.</p>
         <div className="flex items-center gap-6 text-xs">
           <Link to="/privacy" data-testid="footer-privacy-link" className="text-slate-500 hover:text-cyan-300 transition-colors">
             Privacy Policy
           </Link>
           <Link to="/terms" data-testid="footer-terms-link" className="text-slate-500 hover:text-cyan-300 transition-colors">
             Terms of Use
+          </Link>
+          <Link to="/admin" data-testid="footer-admin-link" className="text-slate-600 hover:text-cyan-300 transition-colors">
+            Admin
           </Link>
         </div>
       </div>

@@ -11,18 +11,34 @@ import ServiceDetail from "@/pages/ServiceDetail";
 import Solutions from "@/pages/Solutions";
 import About from "@/pages/About";
 import Projects from "@/pages/Projects";
+import ProjectDetail from "@/pages/ProjectDetail";
 import Insights from "@/pages/Insights";
 import InsightDetail from "@/pages/InsightDetail";
 import Contact from "@/pages/Contact";
 import Careers from "@/pages/Careers";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
+import AdminLogin from "@/pages/AdminLogin";
+import AdminInbox from "@/pages/AdminInbox";
 import NotFound from "@/pages/NotFound";
 
 const ScrollManager = () => {
   const { pathname } = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
+
+const PageviewTracker = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    if (pathname.startsWith("/admin")) return;
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/analytics/pageview`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path: pathname }),
+    }).catch(() => {});
   }, [pathname]);
   return null;
 };
@@ -49,6 +65,7 @@ function App() {
           Skip to main content
         </a>
         <ScrollManager />
+        <PageviewTracker />
         <Header />
         <main id="main-content">
           <Routes>
@@ -58,12 +75,15 @@ function App() {
             <Route path="/solutions" element={<Solutions />} />
             <Route path="/about" element={<About />} />
             <Route path="/projects" element={<Projects />} />
+            <Route path="/projects/:slug" element={<ProjectDetail />} />
             <Route path="/insights" element={<Insights />} />
             <Route path="/insights/:slug" element={<InsightDetail />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/careers" element={<Careers />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/inbox" element={<AdminInbox />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

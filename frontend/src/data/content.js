@@ -184,7 +184,7 @@ export const projects = [
   {
     id: "sap-boomi-order-sync",
     title: "SAP ↔ Boomi Order Synchronisation Blueprint",
-    kind: "Illustrative demonstration",
+    kind: "Demonstration blueprint",
     description:
       "A reference integration blueprint showing how sales orders flow from a commerce API into SAP S/4HANA via Dell Boomi — including canonical order model, error queues, idempotency handling and operator replay.",
     tech: ["Dell Boomi", "SAP OData", "Canonical data model", "Error replay"],
@@ -197,7 +197,7 @@ export const projects = [
   {
     id: "edi-flow-sandbox",
     title: "EDI 850/855/856 Flow Sandbox",
-    kind: "Illustrative demonstration",
+    kind: "Demonstration blueprint",
     description:
       "A sandbox model of a complete order-to-shipment EDI conversation: purchase order ingestion, acknowledgement generation, and advance ship notice assembly — with document-level visibility at each state transition.",
     tech: ["X12 850 / 855 / 856", "AS2 transport", "State machine", "Document tracking"],
@@ -210,7 +210,7 @@ export const projects = [
   {
     id: "event-driven-inventory",
     title: "Event-Driven Inventory Monitor",
-    kind: "Illustrative demonstration",
+    kind: "Demonstration blueprint",
     description:
       "A monitoring blueprint where inventory movements publish events to a stream, an automation layer evaluates thresholds, and an AI agent summarises anomalies for the operations team instead of paging them with raw logs.",
     tech: ["Event streaming", "Threshold automation", "AI summarisation", "Alert routing"],

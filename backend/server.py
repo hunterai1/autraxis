@@ -1,14 +1,18 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request
-from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
+
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr
 from html import escape
 from html.parser import HTMLParser
 from urllib.parse import urlparse
 from typing import Optional
-from datetime import datetime, timezone
-from pathlib import Path
+from datetime import datetime, timezone, timedelta, date
 import os
 import re
 import time
@@ -16,9 +20,8 @@ import ipaddress
 import logging
 import uuid
 import httpx
-
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+import bcrypt
+import jwt
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("autraxis")
@@ -38,8 +41,59 @@ EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO")
 CONTACT_INBOX = os.environ.get("CONTACT_INBOX", "info@autraxis.com")
 CAREERS_INBOX = os.environ.get("CAREERS_INBOX", "careers@autraxis.com")
 
+JWT_ALGORITHM = "HS256"
 
-# ---- Email guardrail gate (G2/G3 structural defense; copy as-is) ----
+
+def get_jwt_secret() -> str:
+    return os.environ["JWT_SECRET"]
+
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+
+
+def create_access_token(user_id: str, email: str) -> str:
+    payload = {
+        "sub": user_id,
+        "email": email,
+        "type": "access",
+        "exp": datetime.now(timezone.utc) + timedelta(hours=12),
+    }
+    return jwt.encode(payload, get_jwt_secret(), algorithm=JWT_ALGORITHM)
+
+
+async def seed_admin():
+    admin_email = os.environ["ADMIN_EMAIL"].lower()
+    admin_password = os.environ["ADMIN_PASSWORD"]
+    existing = await db.users.find_one({"email": admin_email})
+    if existing is None:
+        await db.users.insert_one({
+            "id": str(uuid.uuid4()),
+            "email": admin_email,
+            "password_hash": hash_password(admin_password),
+            "name": "AUTRAXIS Admin",
+            "role": "admin",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+        logger.info("Admin user seeded")
+    elif not verify_password(admin_password, existing["password_hash"]):
+        await db.users.update_one({"email": admin_email}, {"$set": {"password_hash": hash_password(admin_password)}})
+        logger.info("Admin password reconciled with env")
+
+
+@app.on_event("startup")
+async def startup():
+    await db.users.create_index("email", unique=True)
+    await db.login_attempts.create_index("identifier")
+    await db.analytics_pageviews.create_index("day")
+    await seed_admin()
+
+
+# ---- Email guardrail gate (G2/G3 structural defense) ----
 _SHORTENERS = ("bit.ly", "tinyurl.com", "t.co", "is.gd", "cutt.ly", "goo.gl", "rebrand.ly")
 _CRED_ASK = ("reply with your password", "reply with the code", "send your password", "cvv",
              "send us your password", "enter your password below", "confirm your card number",
@@ -148,11 +202,11 @@ async def send_email(*, to: str, subject: str, html: str, reply_to: Optional[str
 _hits: dict = {}
 
 
-def _throttle(ip: str, limit: int = 6, window: int = 600):
+def _throttle(ip: str, limit: int = 6, window: int = 600, detail: str = "Too many requests. Please slow down."):
     now = time.time()
     hits = [t for t in _hits.get(ip, []) if now - t < window]
     if len(hits) >= limit:
-        raise HTTPException(status_code=429, detail="Too many submissions. Please email us directly at info@autraxis.com.")
+        raise HTTPException(status_code=429, detail=detail)
     hits.append(now)
     _hits[ip] = hits
 
@@ -176,6 +230,19 @@ class CareersIn(BaseModel):
     website: str = Field(default="", max_length=200)  # honeypot
 
 
+class LoginIn(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=1, max_length=200)
+
+
+class ReadIn(BaseModel):
+    read: bool
+
+
+class PageviewIn(BaseModel):
+    path: str = Field(min_length=1, max_length=200)
+
+
 # ---- Email templates (server-side only, escaped — G4) ----
 def _email_table(title: str, rows: list) -> str:
     body = "".join(
@@ -197,7 +264,27 @@ def _email_table(title: str, rows: list) -> str:
     )
 
 
-# ---- Routes ----
+# ---- Auth helpers ----
+async def get_current_admin(request: Request) -> dict:
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header[7:] if auth_header.startswith("Bearer ") else None
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        payload = jwt.decode(token, get_jwt_secret(), algorithms=[JWT_ALGORITHM])
+        if payload.get("type") != "access":
+            raise HTTPException(status_code=401, detail="Invalid token type")
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired — please sign in again")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0, "password_hash": 0})
+    if not user or user.get("role") != "admin":
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
+
+
+# ---- Public routes ----
 @api_router.get("/")
 async def root():
     return {"service": "AUTRAXIS API", "status": "ok"}
@@ -210,7 +297,7 @@ async def health():
 
 @api_router.post("/contact")
 async def submit_contact(payload: ContactIn, request: Request):
-    if payload.website:  # honeypot tripped — silently accept
+    if payload.website:
         return {"status": "received", "notified": False}
     _throttle(request.client.host if request.client else "unknown")
     doc = {
@@ -221,6 +308,7 @@ async def submit_contact(payload: ContactIn, request: Request):
         "company": payload.company,
         "topic": payload.topic,
         "message": payload.message,
+        "read": False,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.contact_submissions.insert_one(doc)
@@ -253,6 +341,7 @@ async def submit_careers(payload: CareersIn, request: Request):
         "role": payload.role,
         "linkedin": payload.linkedin,
         "message": payload.message,
+        "read": False,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.career_applications.insert_one(doc)
@@ -270,6 +359,94 @@ async def submit_careers(payload: CareersIn, request: Request):
     except HTTPException as e:
         logger.warning(f"Careers notification email not sent (application stored): {e.detail}")
     return {"status": "received", "notified": notified}
+
+
+@api_router.post("/analytics/pageview")
+async def track_pageview(payload: PageviewIn, request: Request):
+    path = payload.path.strip()
+    if not path.startswith("/") or path.startswith("//") or path.startswith(("/api", "/admin")):
+        return {"status": "ignored"}
+    _throttle(f"pv:{request.client.host if request.client else 'unknown'}", limit=120, window=60)
+    await db.analytics_pageviews.insert_one({
+        "path": path[:200],
+        "day": date.today().isoformat(),
+        "ts": datetime.now(timezone.utc).isoformat(),
+    })
+    return {"status": "ok"}
+
+
+# ---- Auth routes ----
+@api_router.post("/auth/login")
+async def login(payload: LoginIn, request: Request):
+    email = payload.email.lower()
+    ip = request.client.host if request.client else "unknown"
+    identifier = f"{ip}:{email}"
+    attempt = await db.login_attempts.find_one({"identifier": identifier})
+    now = time.time()
+    if attempt and attempt.get("locked_until", 0) > now:
+        raise HTTPException(status_code=429, detail="Too many failed attempts. Try again in 15 minutes.")
+    user = await db.users.find_one({"email": email})
+    ok = bool(user) and verify_password(payload.password, user["password_hash"])
+    if not ok:
+        count = (attempt.get("count", 0) if attempt else 0) + 1
+        update = {"identifier": identifier, "count": count, "last": now}
+        if count >= 5:
+            update["locked_until"] = now + 900
+        await db.login_attempts.update_one({"identifier": identifier}, {"$set": update}, upsert=True)
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    await db.login_attempts.delete_one({"identifier": identifier})
+    return {
+        "token": create_access_token(user["id"], email),
+        "user": {"email": email, "name": user.get("name", "Admin"), "role": user["role"]},
+    }
+
+
+@api_router.get("/auth/me")
+async def me(admin=Depends(get_current_admin)):
+    return admin
+
+
+# ---- Admin routes ----
+_KIND_TO_COLLECTION = {"contact": "contact_submissions", "careers": "career_applications"}
+
+
+@api_router.get("/admin/submissions")
+async def list_submissions(kind: str = "contact", admin=Depends(get_current_admin)):
+    coll_name = _KIND_TO_COLLECTION.get(kind)
+    if not coll_name:
+        raise HTTPException(status_code=400, detail="kind must be 'contact' or 'careers'")
+    docs = await db[coll_name].find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    unread = await db[coll_name].count_documents({"read": False})
+    return {"items": docs, "unread": unread, "total": len(docs)}
+
+
+@api_router.patch("/admin/submissions/{kind}/{sid}/read")
+async def mark_read(kind: str, sid: str, payload: ReadIn, admin=Depends(get_current_admin)):
+    coll_name = _KIND_TO_COLLECTION.get(kind)
+    if not coll_name:
+        raise HTTPException(status_code=400, detail="kind must be 'contact' or 'careers'")
+    result = await db[coll_name].update_one({"id": sid}, {"$set": {"read": payload.read}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    return {"status": "ok"}
+
+
+@api_router.get("/admin/analytics")
+async def analytics(days: int = 30, admin=Depends(get_current_admin)):
+    days = max(1, min(days, 365))
+    cutoff = (date.today() - timedelta(days=days)).isoformat()
+    docs = await db.analytics_pageviews.find({"day": {"$gte": cutoff}}, {"_id": 0}).to_list(100000)
+    by_path: dict = {}
+    by_day: dict = {}
+    for d in docs:
+        by_path[d["path"]] = by_path.get(d["path"], 0) + 1
+        by_day[d["day"]] = by_day.get(d["day"], 0) + 1
+    return {
+        "days": days,
+        "total": len(docs),
+        "by_path": sorted(([{"path": k, "views": v} for k, v in by_path.items()]), key=lambda x: -x["views"])[:20],
+        "by_day": sorted(([{"day": k, "views": v} for k, v in by_day.items()]), key=lambda x: x["day"])[-14:],
+    }
 
 
 app.include_router(api_router)

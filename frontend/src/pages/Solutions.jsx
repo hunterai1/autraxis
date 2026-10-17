@@ -52,7 +52,7 @@ const Solutions = () => {
                 </div>
                 <div className="lg:col-span-3">
                   <p className={`font-mono text-[10px] uppercase tracking-[0.25em] mb-5 ${i % 2 === 0 ? "text-slate-500" : "text-slate-400"}`}>
-                    Reference flow — illustrative
+                    Reference flow
                   </p>
                   <div className="flex flex-col gap-3">
                     {s.flow.map((step, j) => (

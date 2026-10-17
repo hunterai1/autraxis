@@ -6,7 +6,7 @@ import { projects } from "@/data/content";
 import usePageMeta from "@/hooks/usePageMeta";
 
 const Projects = () => {
-  usePageMeta("Projects & Demonstrations", "Illustrative architecture demonstrations and sandbox integration blueprints from AUTRAXIS.");
+  usePageMeta("Projects & Demonstrations", "Architecture demonstrations and sandbox integration blueprints from AUTRAXIS — published to show how we think, not client engagements.");
 
   return (
     <div data-testid="projects-page">
@@ -14,12 +14,12 @@ const Projects = () => {
         testId="projects-hero"
         eyebrow="Projects & Demonstrations"
         title="Blueprints that show how we think"
-        description="Everything on this page is an illustrative demonstration — reference architectures and sandbox builds we publish to make our engineering approach concrete. They are not client engagements, and no customer data appears anywhere in them."
+        description="Everything on this page is a demonstration — reference architectures and sandbox builds we publish to make our engineering approach concrete. They are not client engagements, and no customer data appears anywhere in them."
       />
 
       <section className="bg-white py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 space-y-8">
-          {projects.map((p, i) => (
+          {projects.map((p) => (
             <Reveal key={p.id} delay={0.05}>
               <article
                 data-testid={`project-card-${p.id}`}
@@ -40,6 +40,13 @@ const Projects = () => {
                       </span>
                     ))}
                   </div>
+                  <Link
+                    to={`/projects/${p.id}`}
+                    data-testid={`project-walkthrough-${p.id}`}
+                    className="group mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 text-white text-sm font-semibold transition-colors hover:bg-electric"
+                  >
+                    Open the walkthrough <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+                  </Link>
                 </div>
                 <div className="rounded-2xl bg-slate-900 p-7">
                   <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-cyanglow mb-5">Design highlights</p>

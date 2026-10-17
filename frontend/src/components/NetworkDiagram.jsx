@@ -164,7 +164,7 @@ const NetworkDiagram = ({ interactive = true }) => {
             <p className="text-sm leading-relaxed text-slate-300">{active.note}</p>
           </div>
           <div className="rounded-xl border border-cyan-500/20 bg-abyss/80 p-5 overflow-x-auto">
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-500 mb-2">Sample payload — illustrative</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-500 mb-2">Sample payload</p>
             <pre className="font-mono text-xs leading-relaxed text-skybright whitespace-pre">{active.payload}</pre>
           </div>
         </motion.div>
