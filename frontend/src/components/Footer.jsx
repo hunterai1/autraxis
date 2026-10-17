@@ -13,6 +13,15 @@ const Footer = () => (
             A remote-first enterprise integration and AI technology practice.
             We connect the systems your business already runs on — and make the data between them work harder.
           </p>
+          <div className="mt-8 inline-block rounded-2xl bg-white px-5 py-4" data-testid="footer-full-logo-card">
+            <img
+              src="/brand/logo-full-transparent.png"
+              alt="AUTRAXIS Systems Inc. — full logo"
+              className="h-12 w-auto"
+              loading="lazy"
+              data-testid="footer-full-logo"
+            />
+          </div>
         </div>
 
         <nav aria-label="Footer" className="lg:col-span-2">

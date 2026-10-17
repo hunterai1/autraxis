@@ -1,15 +1,14 @@
 export const LogoMark = ({ size = 36 }) => (
-  <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true" data-testid="logo-mark">
-    <defs>
-      <linearGradient id="ax-arch" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stopColor="#38BDF8" />
-        <stop offset="1" stopColor="#2563EB" />
-      </linearGradient>
-    </defs>
-    <circle cx="32" cy="32" r="26" fill="none" stroke="#E2E8F0" strokeOpacity="0.4" strokeWidth="3.2" pathLength="100" strokeDasharray="86 14" strokeDashoffset="-32" strokeLinecap="round" />
-    <path d="M15 47 C15 25 22 17 32 17 C42 17 49 25 49 47" fill="none" stroke="url(#ax-arch)" strokeWidth="5" strokeLinecap="round" />
-    <circle cx="32" cy="33" r="6.5" fill="#2563EB" />
-  </svg>
+  <img
+    src="/brand/icon-transparent.png"
+    width={size}
+    height={size}
+    alt=""
+    aria-hidden="true"
+    data-testid="logo-mark"
+    className="object-contain shrink-0"
+    style={{ width: size, height: size }}
+  />
 );
 
 const Logo = ({ compact = false }) => (

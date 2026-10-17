@@ -23,7 +23,7 @@ All pages listed above; honest copy with no fabricated proof points; only the tw
 - Verified: API curls (health, contact, careers all 200, notified true); screenshots at 375/768/1366; contact form e2e flow through UI; service detail and article pages.
 
 ## Implemented (2026-10-17, iteration 2)
-- Replaced the placeholder logo with the user-supplied brand: arch+dot+ring mark recreated as SVG for dark UI (header/footer/admin), supplied PNG used as favicon/apple-touch icon and stored in public/brand/; wordmark subline now "SYSTEMS INC."; footer copyright "AUTRAXIS Systems Inc."
+- Replaced the placeholder logo with the user-supplied brand: the ORIGINAL supplied artwork is used verbatim — transparent-background derivatives of the uploaded icon.png (header/footer/admin/favicon/OG card) and logo-full.webp lockup on a white card in the footer; wordmark subline "SYSTEMS INC."; footer copyright "AUTRAXIS Systems Inc." Originals preserved untouched in public/brand/.
 - Admin submissions inbox: JWT auth (seeded admin, brute-force lockout), /admin sign-in, /admin/inbox with Inquiries/Applications tabs, expand-to-read, read/unread toggles, sign out. Tested: login, me, submissions list, read toggle, 401s for unauthenticated/wrong-password.
 - Privacy-friendly analytics: cookieless/IP-less pageview counter (POST /api/analytics/pageview), admin Analytics tab with 30-day totals, 14-day bars, top pages. Privacy policy updated to disclose it.
 - Blueprint walkthrough pages: /projects/:slug for all three demonstrations — custom flow diagram, sample payloads, three-part walkthrough narrative, highlights, CTA. Each clearly labeled "Demonstration blueprint — not a client engagement".
