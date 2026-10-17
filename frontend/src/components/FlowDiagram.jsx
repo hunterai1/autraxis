@@ -10,7 +10,13 @@ const FlowDiagram = ({ nodes, edges, testId }) => {
           if (!from || !to) return null;
           const pathId = `${testId}-edge-${i}`;
           const d = `M ${from.x} ${from.y} L ${to.x} ${to.y}`;
-          if (e.label) labels.push({ x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 - 14, text: e.label });
+          if (e.label) {
+            const samePair = edges.filter(
+              (o) => (o.from === e.from && o.to === e.to) || (o.from === e.to && o.to === e.from)
+            );
+            const below = samePair.length > 1 && samePair.indexOf(e) === 1;
+            labels.push({ x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 + (below ? 22 : -14), text: e.label });
+          }
           return (
             <g key={pathId}>
               <path id={pathId} d={d} fill="none" stroke="rgba(56,189,248,0.22)" strokeWidth="1.2" />

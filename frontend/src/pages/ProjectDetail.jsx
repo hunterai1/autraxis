@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, ArrowUpRight, FlaskConical, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, CheckCircle2 } from "lucide-react";
 import { Reveal, Eyebrow } from "@/components/Reveal";
 import FlowDiagram from "@/components/FlowDiagram";
 import { projects } from "@/data/content";
@@ -25,9 +25,9 @@ const ProjectDetail = () => {
             <Link to="/projects" data-testid="back-to-projects-link" className="inline-flex items-center gap-2 text-sm text-mist hover:text-cyan-300 transition-colors mb-8">
               <ArrowLeft size={15} /> All blueprints
             </Link>
-            <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30">
-              <FlaskConical size={12} /> Demonstration blueprint — not a client engagement
-            </span>
+            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-500">
+              Demonstration blueprint — reference architecture, not a client engagement
+            </p>
             <h1 className="mt-6 font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-frost max-w-3xl">
               {project.title}
             </h1>

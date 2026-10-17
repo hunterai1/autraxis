@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, FlaskConical, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import PageHero from "@/components/PageHero";
 import { Reveal, Eyebrow } from "@/components/Reveal";
 import { projects } from "@/data/content";
@@ -26,10 +26,7 @@ const Projects = () => {
                 className="rounded-3xl border border-hairline bg-[#FAFAFA] p-8 lg:p-12 grid lg:grid-cols-2 gap-10 transition-all duration-300 hover:border-cyan-500/40"
               >
                 <div>
-                  <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                    <FlaskConical size={12} /> {p.kind}
-                  </span>
-                  <h2 className="mt-5 font-display text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+                  <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
                     {p.title}
                   </h2>
                   <p className="mt-4 text-sm sm:text-base leading-relaxed text-slate-600">{p.description}</p>
