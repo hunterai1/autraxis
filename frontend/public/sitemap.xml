@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://autraxis.com/</loc><priority>1.0</priority></url>
+  <url><loc>https://autraxis.com/services</loc><priority>0.9</priority></url>
+  <url><loc>https://autraxis.com/services/dell-boomi</loc><priority>0.8</priority></url>
+  <url><loc>https://autraxis.com/services/sap-connectivity</loc><priority>0.8</priority></url>
+  <url><loc>https://autraxis.com/services/edi-supply-chain</loc><priority>0.8</priority></url>
+  <url><loc>https://autraxis.com/services/cloud-integration</loc><priority>0.8</priority></url>
+  <url><loc>https://autraxis.com/services/api-engineering</loc><priority>0.8</priority></url>
+  <url><loc>https://autraxis.com/services/ai-automation</loc><priority>0.8</priority></url>
+  <url><loc>https://autraxis.com/solutions</loc><priority>0.8</priority></url>
+  <url><loc>https://autraxis.com/projects</loc><priority>0.7</priority></url>
+  <url><loc>https://autraxis.com/insights</loc><priority>0.7</priority></url>
+  <url><loc>https://autraxis.com/about</loc><priority>0.7</priority></url>
+  <url><loc>https://autraxis.com/careers</loc><priority>0.7</priority></url>
+  <url><loc>https://autraxis.com/contact</loc><priority>0.8</priority></url>
+  <url><loc>https://autraxis.com/privacy</loc><priority>0.4</priority></url>
+  <url><loc>https://autraxis.com/terms</loc><priority>0.4</priority></url>
+</urlset>

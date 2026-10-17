@@ -1,0 +1,138 @@
+{
+  "brand_identity": {
+    "company_name": "AUTRAXIS",
+    "tagline": "Intelligence. Integrated.",
+    "positioning": "Remote-first enterprise integration and AI technology business operating at the intersection of enterprise architecture, cloud middleware, and intelligent automation.",
+    "core_pillars": [
+      "Enterprise Integration & iPaaS",
+      "API Engineering & Ecosystems",
+      "SAP & Legacy System Interoperability",
+      "B2B EDI & Supply Chain Data Pipelines",
+      "Cloud Integration Architecture",
+      "AI & Data Flow Automation"
+    ],
+    "tone_and_voice": "Technical, authoritative, business-friendly, precise, forward-looking, and free of hype or unverified metrics.",
+    "logo_mark_spec": "Original geometric 'A' node-network SVG mark composed of connected vectors with glowing cyan keyframes, used as primary header brand mark and favicon."
+  },
+  "visual_theme": {
+    "mode": "Hybrid (Cinematic Deep-Navy Dark Hero & Tech Sections, blended with Clean Crisp White Editorial Sections)",
+    "color_palette": {
+      "deep_navy_bg": "#030712",
+      "hero_card_bg": "#0B132B",
+      "tech_dark_surface": "#0F172A",
+      "editorial_light_bg": "#FAFAFA",
+      "pure_white": "#FFFFFF",
+      "electric_blue": "#2563EB",
+      "cyan_glow": "#06B6D4",
+      "bright_sky": "#38BDF8",
+      "emerald_status": "#10B981",
+      "amber_alert": "#F59E0B",
+      "border_dark": "rgba(56, 189, 248, 0.15)",
+      "border_light": "#E2E8F0",
+      "text_dark_heading": "#0F172A",
+      "text_dark_body": "#334155",
+      "text_light_heading": "#F8FAFC",
+      "text_light_body": "#94A3B8"
+    },
+    "typography": {
+      "heading_font": "Outfit, sans-serif (Display and Section Titles)",
+      "body_font": "Inter, sans-serif (Clean legibility)",
+      "mono_font": "JetBrains Mono, monospace (Code, Architecture specs, API payloads)",
+      "h1_hero_max_size": "text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight",
+      "h2_section_size": "text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight",
+      "h3_card_size": "text-xl sm:text-2xl font-semibold",
+      "body_size": "text-base sm:text-lg leading-relaxed"
+    }
+  },
+  "layout_and_spacing": {
+    "generous_spacing": "Use py-20 lg:py-32 for major sections, gap-8 to gap-12 for bento grids.",
+    "bento_grid_rules": "Mix tall cards (col-span-4 row-span-2), hero blocks (col-span-8), and metric indicators (col-span-4) with glassmorphism or 1px subtle borders.",
+    "container_padding": "Internal padding p-6 to p-10 on all cards and containers to eliminate border collisions."
+  },
+  "key_interactive_components": {
+    "interactive_architecture_diagram": {
+      "type": "Custom SVG & Framer Motion Node Graph",
+      "description": "Interactive Enterprise Integration Engine visual showing real-time payload flows between ERP (SAP), iPaaS (Dell Boomi), EDI endpoints, Cloud Databases, and AI Automation Agents.",
+      "nodes": ["SAP S/4HANA", "Dell Boomi iPaaS", "API Gateway", "B2B EDI Gate", "Cloud Data Lake", "AUTRAXIS AI Agent"],
+      "features": "Clickable nodes displaying payload structures, connection metrics, latency stats, and active data protocols."
+    },
+    "editorial_ribbon_marquee": {
+      "type": "Slow Drift Marquee (react-fast-marquee)",
+      "content": "Dell Boomi iPaaS • SAP S/4HANA Integration • AS2 & EDI standardisation • Cloud Architecture • Intelligent Process Automation • Hybrid Cloud Synchronization • Microservices Security"
+    },
+    "forms": {
+      "contact_form": "Full validated form posting to backend /api/contact endpoint with data-testid attributes.",
+      "careers_form": "Applicant submission form posting to backend /api/careers with resume link/details."
+    }
+  },
+  "pages_structure": [
+    {
+      "name": "Home",
+      "path": "/",
+      "description": "Cinematic hero with node network SVG, tagline reveal, architectural diagram, core services grid, solution showcases, editorial insight preview, and CTA."
+    },
+    {
+      "name": "Services Index & Detail Pages",
+      "path": "/services",
+      "detail_routes": [
+        "/services/dell-boomi",
+        "/services/sap-connectivity",
+        "/services/edi-supply-chain",
+        "/services/cloud-integration",
+        "/services/api-engineering",
+        "/services/ai-automation"
+      ],
+      "description": "Technical enterprise integration offerings breakdown, architectural approach, and capability specifications."
+    },
+    {
+      "name": "Solutions & Use Cases",
+      "path": "/solutions",
+      "description": "Industry integration architectures (Healthcare, Manufacturing, Retail EDI, Financial Middleware) explained with detailed technical flow diagrams."
+    },
+    {
+      "name": "About",
+      "path": "/about",
+      "description": "Remote-first operating model, integration engineering philosophy, architectural governance, and core technology stack."
+    },
+    {
+      "name": "Projects & Demonstrations",
+      "path": "/projects",
+      "description": "Clearly labeled as illustrative architecture demonstrations and sandbox integration blueprints."
+    },
+    {
+      "name": "Insights & Articles",
+      "path": "/insights",
+      "detail_route": "/insights/:id",
+      "description": "Deep-dive technical whitepapers and engineering articles on iPaaS migration, SAP BTP integration, and event-driven EDI."
+    },
+    {
+      "name": "Contact",
+      "path": "/contact",
+      "description": "Enterprise consultation inquiry form with responsive layout, office locations, and direct contact options."
+    },
+    {
+      "name": "Careers",
+      "path": "/careers",
+      "description": "Remote-first openings, engineering culture breakdown, and interactive applicant portal."
+    },
+    {
+      "name": "Privacy & Legal",
+      "path": "/privacy",
+      "description": "Enterprise data governance, privacy policy, and compliance foundations."
+    }
+  ],
+  "curated_image_assets": {
+    "data_center_server": "https://images.pexels.com/photos/17489153/pexels-photo-17489153.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "server_rack_blue": "https://images.pexels.com/photos/1148820/pexels-photo-1148820.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "cloud_network_3d": "https://images.unsplash.com/photo-1667984390538-3dea7a3fe33d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHw0fHxlbnRlcnByaXNlJTIwY2xvdWQlMjBuZXR3b3JrJTIwZGF0YSUyMGNlbnRlciUyMHRlY2hub2xvZ3l8ZW58MHx8fHwxNzkyMjM4NzY0fDA&ixlib=rb-4.1.0&q=85",
+    "network_cables": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHxlbnRlcnByaXNlJTIwY2xvdWQlMjBuZXR3b3JrJTIwZGF0YSUyMGNlbnRlciUyMHRlY2hub2xvZ3l8ZW58MHx8fHwxNzkyMjM4NzY0fDA&ixlib=rb-4.1.0&q=85",
+    "remote_engineer_workspace": "https://images.unsplash.com/photo-1580894894513-541e068a3e2b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNTl8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBzb2Z0d2FyZSUyMGVuZ2luZWVyJTIwbGFwdG9wJTIwb2ZmaWNlJTIwd29ya3NwYWNlfGVufDB8fHx8MTc5MjIzODc3MHww&ixlib=rb-4.1.0&q=85",
+    "developer_coding_desk": "https://images.pexels.com/photos/34804001/pexels-photo-34804001.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+  },
+  "general_ui_ux_guidelines": {
+    "data_testid_requirement": "All interactive buttons, inputs, links, tabs, cards, and form elements MUST include a descriptive data-testid attribute (e.g., data-testid='nav-home-link', data-testid='contact-submit-button').",
+    "header_navigation": "Header must NEVER be fully transparent. Use glassmorphic backdrop-blur-md bg-[#030712]/90 with a crisp cyan bottom border border-cyan-500/20. Ensure desktop links are always visible.",
+    "hover_states": "Hover states must explicitly declare text colors, e.g., hover:bg-cyan-500/10 hover:text-cyan-400 hover:border-cyan-400/40.",
+    "no_fake_metrics": "Do NOT include fake customer logos, fabricated client metrics, or fake testimonials. Focus on technical architecture capabilities, code samples, interactive diagrams, and business value propositions."
+  }
+}
