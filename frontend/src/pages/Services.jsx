@@ -2,11 +2,13 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import PageHero from "@/components/PageHero";
 import { Reveal, Eyebrow } from "@/components/Reveal";
-import { services } from "@/data/content";
+import ServiceIcon from "@/components/ServiceIcon";
+import { useServices } from "@/data/useCms";
 import usePageMeta from "@/hooks/usePageMeta";
 
 const Services = () => {
   usePageMeta("Services", "Enterprise integration services: Dell Boomi iPaaS, SAP connectivity, B2B EDI, cloud integration architecture, API engineering and AI automation.");
+  const services = useServices();
 
   return (
     <div data-testid="services-page">
@@ -21,7 +23,7 @@ const Services = () => {
         <div className="max-w-7xl mx-auto px-5 sm:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {services.map((s, i) => (
-              <Reveal key={s.slug} delay={i * 0.05}>
+              <Reveal key={s.slug || s.id} delay={i * 0.05}>
                 <Link
                   to={`/services/${s.slug}`}
                   data-testid={`services-page-card-${s.slug}`}
@@ -29,14 +31,14 @@ const Services = () => {
                 >
                   <div className="flex items-start justify-between">
                     <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center transition-colors duration-300 group-hover:bg-electric">
-                      <s.icon size={22} className="text-cyanglow" />
+                      <ServiceIcon slug={s.slug} size={22} />
                     </div>
                     <ArrowRight size={20} className="text-slate-300 transition-all duration-300 group-hover:text-cyanglow group-hover:translate-x-1" />
                   </div>
                   <h2 className="mt-6 font-display text-2xl font-semibold text-slate-900">{s.name}</h2>
                   <p className="mt-3 text-sm leading-relaxed text-slate-600 flex-1">{s.short}</p>
                   <div className="mt-6 flex flex-wrap gap-2">
-                    {s.stack.slice(0, 3).map((t) => (
+                    {(s.stack || []).slice(0, 3).map((t) => (
                       <span key={t} className="font-mono text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
                         {t}
                       </span>

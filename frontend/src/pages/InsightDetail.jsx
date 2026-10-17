@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
-import { insights } from "@/data/content";
+import { useInsights } from "@/data/useCms";
 import usePageMeta from "@/hooks/usePageMeta";
 import NotFound from "@/pages/NotFound";
 
@@ -10,6 +10,7 @@ const formatDate = (iso) =>
 
 const InsightDetail = () => {
   const { slug } = useParams();
+  const insights = useInsights();
   const article = insights.find((a) => a.slug === slug);
   usePageMeta(article ? article.title : "Insight", article?.excerpt);
 

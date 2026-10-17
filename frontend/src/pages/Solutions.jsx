@@ -2,10 +2,11 @@ import { Link } from "react-router-dom";
 import { ArrowRight, ArrowDown } from "lucide-react";
 import PageHero from "@/components/PageHero";
 import { Reveal, Eyebrow } from "@/components/Reveal";
-import { solutions } from "@/data/content";
+import { useSolutions } from "@/data/useCms";
 import usePageMeta from "@/hooks/usePageMeta";
 
 const Solutions = () => {
+  const solutions = useSolutions();
   usePageMeta("Solutions & Use Cases", "Representative integration architectures for manufacturing, retail & distribution, healthcare and financial services.");
 
   return (

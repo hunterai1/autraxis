@@ -22,6 +22,18 @@ All pages listed above; honest copy with no fabricated proof points; only the tw
 - SEO metadata, sitemap.xml, robots.txt, favicon.svg, .env.example, DEPLOYMENT.md (cost-conscious guidance, Zoho notes, unresolved legal/config items).
 - Verified: API curls (health, contact, careers all 200, notified true); screenshots at 375/768/1366; contact form e2e flow through UI; service detail and article pages.
 
+## Implemented (2026-10-17, iteration 3 — Control Center)
+- Full admin platform under /admin/*: dark-sidebar Control Center (dashboard, inquiries, applications, content, monitoring, audit logs, users & roles, site settings, security) with noindex and robots.txt exclusion; admin link removed from public footer.
+- RBAC with 5 roles and server-side capability enforcement (`require_cap`), denied-attempt audit logging; noindex header on admin APIs.
+- Auth hardening: 12h JWT with per-user token_version (invalidation on password change/suspend/revoke), generic login errors, IP+email lockout, single-use hashed reset tokens (forgot/reset flows + invite-by-setup-link), re-auth for sensitive user actions, last-super-admin safeguards.
+- CMS: MongoDB is now the content source of truth — singletons (home/about/settings) with draft→publish and revision restore; collections (services, solutions, projects, insights, jobs) with status lifecycle; public site consumes /api/content/bundle with build-time fallbacks; social links managed in Settings (enable/order/validate).
+- Jobs module: full lifecycle (draft/published/closed/archived), careers page renders published jobs, applications get status + internal notes.
+- Audit log: append-only, sanitized metadata, filtered view + gated export.
+- Monitoring: real liveness/readiness endpoints, DB ping, email last-send status, in-memory traffic/error metrics — no fabricated values.
+- Verified: 19/19 automated security checks (tests/security_check.py), full RBAC curl matrix, content publish roundtrip visible on public site, jobs draft→publish→delete lifecycle, production build (CI=true) passes, admin UI screenshotted (dashboard, content, users, jobs, settings, monitoring, audit).
+- Incident during build: admin router wrote jobs to cms_jobs while bundle read jobs — fixed by unifying collection mapping; verified end to end. Note: preview MongoDB data does not survive pod restarts (documented).
+- Not implemented (documented): TOTP MFA, persistent external monitoring/alerts, admin subdomain.
+
 ## Implemented (2026-10-17, iteration 2)
 - Replaced the placeholder logo with the user-supplied brand: the ORIGINAL supplied artwork is used verbatim — transparent-background derivatives of the uploaded icon.png (header/footer/admin/favicon/OG card) and logo-full.webp lockup on a white card in the footer; wordmark subline "SYSTEMS INC."; footer copyright "AUTRAXIS Systems Inc." Originals preserved untouched in public/brand/.
 - Admin submissions inbox: JWT auth (seeded admin, brute-force lockout), /admin sign-in, /admin/inbox with Inquiries/Applications tabs, expand-to-read, read/unread toggles, sign out. Tested: login, me, submissions list, read toggle, 401s for unauthenticated/wrong-password.

@@ -4,27 +4,31 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
-from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseModel, Field, EmailStr
+import os
+import re
+import time
+import uuid
+import logging
+import ipaddress
+from collections import deque
+from datetime import datetime, timezone, timedelta
 from html import escape
 from html.parser import HTMLParser
 from urllib.parse import urlparse
 from typing import Optional
-from datetime import datetime, timezone, timedelta, date
-import os
-import re
-import time
-import ipaddress
-import logging
-import uuid
-import csv
-import io
+
 import httpx
-import bcrypt
-import jwt
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseModel, Field, EmailStr
+
+from security import (
+    make_auth, audit, hash_password, verify_password, create_access_token,
+    hash_reset_token, new_reset_token, public_user, utcnow, RESET_TOKEN_TTL_MINUTES,
+)
+from seeds import seed_all
+from admin import make_admin_router
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("autraxis")
@@ -43,30 +47,12 @@ EMAIL_FROM_NAME = os.environ["EMAIL_FROM_NAME"]  # This app's OWN brand (G1)
 EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO")
 CONTACT_INBOX = os.environ.get("CONTACT_INBOX", "info@autraxis.com")
 CAREERS_INBOX = os.environ.get("CAREERS_INBOX", "careers@autraxis.com")
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "").rstrip("/")
 
-JWT_ALGORITHM = "HS256"
+metrics = {"requests": 0, "err_total": 0, "time_ms": 0.0, "max_ms": 0.0, "errors": deque(maxlen=50)}
+STARTED_AT = time.time()
 
-
-def get_jwt_secret() -> str:
-    return os.environ["JWT_SECRET"]
-
-
-def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
-
-def verify_password(plain: str, hashed: str) -> bool:
-    return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
-
-
-def create_access_token(user_id: str, email: str) -> str:
-    payload = {
-        "sub": user_id,
-        "email": email,
-        "type": "access",
-        "exp": datetime.now(timezone.utc) + timedelta(hours=12),
-    }
-    return jwt.encode(payload, get_jwt_secret(), algorithm=JWT_ALGORITHM)
+get_current_admin, require_cap = make_auth(db)
 
 
 async def seed_admin():
@@ -79,12 +65,17 @@ async def seed_admin():
             "email": admin_email,
             "password_hash": hash_password(admin_password),
             "name": "AUTRAXIS Admin",
-            "role": "admin",
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "role": "super_admin",
+            "status": "active",
+            "must_change_password": False,
+            "token_version": 1,
+            "created_at": utcnow(),
         })
-        logger.info("Admin user seeded")
-    # No password reconciliation: the admin changes their password in-app,
-    # so the env value only applies to the very first seed.
+        logger.info("Super admin seeded")
+    elif existing.get("role") != "super_admin":
+        await db.users.update_one({"email": admin_email}, {"$set": {"role": "super_admin", "status": "active"}})
+        logger.info("Bootstrap account promoted to super_admin")
+    # Password is intentionally NOT reconciled: the admin changes it in-app.
 
 
 @app.on_event("startup")
@@ -92,7 +83,16 @@ async def startup():
     await db.users.create_index("email", unique=True)
     await db.login_attempts.create_index("identifier")
     await db.analytics_pageviews.create_index("day")
+    await db.audit_logs.create_index("ts")
+    await db.audit_logs.create_index("actor_email")
+    await db.jobs.create_index("status")
+    await db.content.create_index("key", unique=True)
+    await db.password_resets.create_index("token_hash")
+    for name in ("services", "solutions", "projects", "insights"):
+        await db[f"cms_{name}"].create_index("id", unique=True)
+    await db.jobs.create_index("id", unique=True)
     await seed_admin()
+    await seed_all(db)
 
 
 # ---- Email guardrail gate (G2/G3 structural defense) ----
@@ -182,8 +182,18 @@ async def send_email(*, to: str, subject: str, html: str, reply_to: Optional[str
                 json=payload,
             )
         resp.raise_for_status()
+        await db.ops_state.update_one(
+            {"key": "last_email"},
+            {"$set": {"value": {"ts": utcnow(), "ok": True, "to_domain": to.split("@")[-1]}}},
+            upsert=True,
+        )
         return resp.json().get("id")
     except httpx.HTTPStatusError as e:
+        await db.ops_state.update_one(
+            {"key": "last_email"},
+            {"$set": {"value": {"ts": utcnow(), "ok": False, "code": e.response.status_code}}},
+            upsert=True,
+        )
         try:
             code = e.response.json().get("code", "")
         except ValueError:
@@ -196,6 +206,11 @@ async def send_email(*, to: str, subject: str, html: str, reply_to: Optional[str
     except HTTPException:
         raise
     except Exception as e:
+        await db.ops_state.update_one(
+            {"key": "last_email"},
+            {"$set": {"value": {"ts": utcnow(), "ok": False, "code": "connection_error"}}},
+            upsert=True,
+        )
         logger.error(f"Email send error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to send email")
 
@@ -237,12 +252,17 @@ class LoginIn(BaseModel):
     password: str = Field(min_length=1, max_length=200)
 
 
-class ReadIn(BaseModel):
-    read: bool
-
-
 class ChangePasswordIn(BaseModel):
     current_password: str = Field(min_length=1, max_length=200)
+    new_password: str = Field(min_length=10, max_length=200)
+
+
+class ForgotIn(BaseModel):
+    email: EmailStr
+
+
+class ResetIn(BaseModel):
+    token: str = Field(min_length=10, max_length=300)
     new_password: str = Field(min_length=10, max_length=200)
 
 
@@ -271,26 +291,6 @@ def _email_table(title: str, rows: list) -> str:
     )
 
 
-# ---- Auth helpers ----
-async def get_current_admin(request: Request) -> dict:
-    auth_header = request.headers.get("Authorization", "")
-    token = auth_header[7:] if auth_header.startswith("Bearer ") else None
-    if not token:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    try:
-        payload = jwt.decode(token, get_jwt_secret(), algorithms=[JWT_ALGORITHM])
-        if payload.get("type") != "access":
-            raise HTTPException(status_code=401, detail="Invalid token type")
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired — please sign in again")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0, "password_hash": 0})
-    if not user or user.get("role") != "admin":
-        raise HTTPException(status_code=401, detail="User not found")
-    return user
-
-
 # ---- Public routes ----
 @api_router.get("/")
 async def root():
@@ -299,7 +299,52 @@ async def root():
 
 @api_router.get("/health")
 async def health():
-    return {"status": "ok", "service": "autraxis-api", "time": datetime.now(timezone.utc).isoformat()}
+    return {"status": "ok"}
+
+
+@api_router.get("/ready")
+async def ready():
+    try:
+        await db.command("ping")
+        return {"status": "ready"}
+    except Exception:
+        raise HTTPException(status_code=503, detail="not ready")
+
+
+_content_cache = {"data": None, "ts": 0.0}
+
+
+@api_router.get("/content/bundle")
+async def content_bundle():
+    now = time.time()
+    if _content_cache["data"] and now - _content_cache["ts"] < 30:
+        return _content_cache["data"]
+    singletons = await db.content.find({}, {"_id": 0}).to_list(20)
+    by_key = {s["key"]: (s.get("published") or {}) for s in singletons}
+    settings = by_key.get("settings", {})
+    settings_public = {
+        k: v for k, v in settings.items()
+        if k in ("brand_name", "legal_name", "tagline", "info_email", "careers_email",
+                 "cta_text", "footer_text", "copyright", "seo_title", "seo_description")
+    }
+    socials = sorted(
+        [s for s in settings.get("socials", []) if s.get("enabled")],
+        key=lambda s: s.get("order", 99),
+    )
+    data = {
+        "home": by_key.get("home"),
+        "about": by_key.get("about"),
+        "settings": settings_public,
+        "socials": socials,
+        "services": await db.cms_services.find({"status": "published"}, {"_id": 0}).to_list(50),
+        "solutions": await db.cms_solutions.find({"status": "published"}, {"_id": 0}).to_list(50),
+        "projects": await db.cms_projects.find({"status": "published"}, {"_id": 0}).to_list(50),
+        "insights": await db.cms_insights.find({"status": "published"}, {"_id": 0}).to_list(100),
+        "jobs": await db.jobs.find({"status": "published"}, {"_id": 0, "created_by": 0, "updated_by": 0}).to_list(100),
+    }
+    _content_cache["data"] = data
+    _content_cache["ts"] = now
+    return data
 
 
 @api_router.post("/contact")
@@ -316,7 +361,9 @@ async def submit_contact(payload: ContactIn, request: Request):
         "topic": payload.topic,
         "message": payload.message,
         "read": False,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "status": "new",
+        "notes": [],
+        "created_at": utcnow(),
     }
     await db.contact_submissions.insert_one(doc)
     notified = False
@@ -349,7 +396,9 @@ async def submit_careers(payload: CareersIn, request: Request):
         "linkedin": payload.linkedin,
         "message": payload.message,
         "read": False,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "status": "new",
+        "notes": [],
+        "created_at": utcnow(),
     }
     await db.career_applications.insert_one(doc)
     notified = False
@@ -376,13 +425,16 @@ async def track_pageview(payload: PageviewIn, request: Request):
     _throttle(f"pv:{request.client.host if request.client else 'unknown'}", limit=120, window=60)
     await db.analytics_pageviews.insert_one({
         "path": path[:200],
-        "day": date.today().isoformat(),
-        "ts": datetime.now(timezone.utc).isoformat(),
+        "day": datetime.now(timezone.utc).date().isoformat(),
+        "ts": utcnow(),
     })
     return {"status": "ok"}
 
 
 # ---- Auth routes ----
+GENERIC_AUTH_ERROR = "Invalid email or password"
+
+
 @api_router.post("/auth/login")
 async def login(payload: LoginIn, request: Request):
     email = payload.email.lower()
@@ -391,121 +443,140 @@ async def login(payload: LoginIn, request: Request):
     attempt = await db.login_attempts.find_one({"identifier": identifier})
     now = time.time()
     if attempt and attempt.get("locked_until", 0) > now:
+        await audit(db, None, "auth.login_locked", "auth", meta={"email": email}, request=request)
         raise HTTPException(status_code=429, detail="Too many failed attempts. Try again in 15 minutes.")
     user = await db.users.find_one({"email": email})
-    ok = bool(user) and verify_password(payload.password, user["password_hash"])
+    ok = bool(user) and user.get("status") == "active" and verify_password(payload.password, user["password_hash"])
     if not ok:
         count = (attempt.get("count", 0) if attempt else 0) + 1
         update = {"identifier": identifier, "count": count, "last": now}
         if count >= 5:
             update["locked_until"] = now + 900
         await db.login_attempts.update_one({"identifier": identifier}, {"$set": update}, upsert=True)
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+        await audit(db, None, "auth.login_failed", "auth", result="failed", meta={"email": email}, request=request)
+        raise HTTPException(status_code=401, detail=GENERIC_AUTH_ERROR)
     await db.login_attempts.delete_one({"identifier": identifier})
-    return {
-        "token": create_access_token(user["id"], email),
-        "user": {"email": email, "name": user.get("name", "Admin"), "role": user["role"]},
-    }
+    await db.users.update_one({"id": user["id"]}, {"$set": {"last_login": utcnow()}})
+    await audit(db, user, "auth.login", "auth", request=request)
+    return {"token": create_access_token(user), "user": public_user(user)}
+
+
+@api_router.post("/auth/logout")
+async def logout(request: Request, admin=Depends(get_current_admin)):
+    await audit(db, admin, "auth.logout", "auth", request=request)
+    return {"status": "ok"}
 
 
 @api_router.get("/auth/me")
 async def me(admin=Depends(get_current_admin)):
-    return admin
+    return public_user(admin)
 
 
 @api_router.post("/auth/change-password")
 async def change_password(payload: ChangePasswordIn, request: Request, admin=Depends(get_current_admin)):
     _throttle(f"pw:{request.client.host if request.client else 'unknown'}", limit=10, window=600)
-    user = await db.users.find_one({"email": admin["email"]})
+    user = await db.users.find_one({"id": admin["id"]})
     if not user or not verify_password(payload.current_password, user["password_hash"]):
+        await audit(db, admin, "auth.password_change_failed", "auth", result="failed", request=request)
         raise HTTPException(status_code=400, detail="Current password is incorrect")
-    await db.users.update_one({"id": user["id"]}, {"$set": {"password_hash": hash_password(payload.new_password)}})
-    logger.info("Admin password changed in-app")
+    new_tv = user.get("token_version", 1) + 1
+    await db.users.update_one({"id": user["id"]}, {"$set": {
+        "password_hash": hash_password(payload.new_password),
+        "token_version": new_tv,
+        "must_change_password": False,
+    }})
+    await audit(db, admin, "auth.password_changed", "auth", request=request)
+    user["token_version"] = new_tv
+    return {"status": "password_updated", "token": create_access_token(user)}
+
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(payload: ForgotIn, request: Request):
+    _throttle(f"fp:{request.client.host if request.client else 'unknown'}", limit=5, window=600,
+              detail="Too many requests. Try again later.")
+    user = await db.users.find_one({"email": payload.email.lower(), "status": "active"})
+    if user:
+        token = new_reset_token()
+        await db.password_resets.insert_one({
+            "user_id": user["id"],
+            "token_hash": hash_reset_token(token),
+            "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=RESET_TOKEN_TTL_MINUTES)).isoformat(),
+            "used": False,
+            "created_at": utcnow(),
+        })
+        reset_url = f"{FRONTEND_URL}/admin/reset?token={token}"
+        try:
+            await send_email(
+                to=user["email"],
+                subject="[AUTRAXIS] Reset your Control Center password",
+                html=(
+                    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFC;padding:24px 0"><tr><td align="center">'
+                    '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px">'
+                    '<tr><td style="padding:24px;font-family:Arial,sans-serif;font-size:18px;font-weight:bold;color:#0F172A">Password reset requested</td></tr>'
+                    f'<tr><td style="padding:0 24px 16px;font-family:Arial,sans-serif;font-size:14px;line-height:1.6;color:#334155">A password reset was requested for your AUTRAXIS Control Center account. '
+                    f'This link expires in {RESET_TOKEN_TTL_MINUTES} minutes and works once. If you did not request it, ignore this email.</td></tr>'
+                    f'<tr><td style="padding:0 24px 24px"><a href="{reset_url}" style="font-family:Arial,sans-serif;font-size:14px;color:#2563EB">Reset your password</a></td></tr>'
+                    '</table></td></tr></table>'
+                ),
+            )
+        except HTTPException as e:
+            logger.warning(f"Reset email failed: {e.detail}")
+        await audit(db, user, "auth.reset_requested", "auth", request=request)
+    return {"status": "ok", "message": "If that account exists, a reset link is on its way."}
+
+
+@api_router.post("/auth/reset-password")
+async def reset_password(payload: ResetIn, request: Request):
+    record = await db.password_resets.find_one({
+        "token_hash": hash_reset_token(payload.token),
+        "used": False,
+        "expires_at": {"$gt": utcnow()},
+    })
+    if not record:
+        raise HTTPException(status_code=400, detail="This reset link is invalid or has expired")
+    user = await db.users.find_one({"id": record["user_id"]})
+    if not user:
+        raise HTTPException(status_code=400, detail="This reset link is invalid or has expired")
+    new_tv = user.get("token_version", 1) + 1
+    await db.users.update_one({"id": user["id"]}, {"$set": {
+        "password_hash": hash_password(payload.new_password),
+        "token_version": new_tv,
+        "must_change_password": False,
+    }})
+    await db.password_resets.update_one({"_id": record["_id"]}, {"$set": {"used": True}})
+    await audit(db, user, "auth.password_reset", "auth", request=request)
     return {"status": "password_updated"}
 
 
-# ---- Admin routes ----
-_KIND_TO_COLLECTION = {"contact": "contact_submissions", "careers": "career_applications"}
-
-
-@api_router.get("/admin/submissions")
-async def list_submissions(kind: str = "contact", admin=Depends(get_current_admin)):
-    coll_name = _KIND_TO_COLLECTION.get(kind)
-    if not coll_name:
-        raise HTTPException(status_code=400, detail="kind must be 'contact' or 'careers'")
-    docs = await db[coll_name].find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
-    unread = await db[coll_name].count_documents({"read": False})
-    return {"items": docs, "unread": unread, "total": len(docs)}
-
-
-@api_router.patch("/admin/submissions/{kind}/{sid}/read")
-async def mark_read(kind: str, sid: str, payload: ReadIn, admin=Depends(get_current_admin)):
-    coll_name = _KIND_TO_COLLECTION.get(kind)
-    if not coll_name:
-        raise HTTPException(status_code=400, detail="kind must be 'contact' or 'careers'")
-    result = await db[coll_name].update_one({"id": sid}, {"$set": {"read": payload.read}})
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Submission not found")
-    return {"status": "ok"}
-
-
-@api_router.delete("/admin/submissions/{kind}/{sid}")
-async def delete_submission(kind: str, sid: str, admin=Depends(get_current_admin)):
-    coll_name = _KIND_TO_COLLECTION.get(kind)
-    if not coll_name:
-        raise HTTPException(status_code=400, detail="kind must be 'contact' or 'careers'")
-    result = await db[coll_name].delete_one({"id": sid})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Submission not found")
-    return {"status": "deleted"}
-
-
-@api_router.get("/admin/submissions/export")
-async def export_submissions(kind: str = "contact", admin=Depends(get_current_admin)):
-    coll_name = _KIND_TO_COLLECTION.get(kind)
-    if not coll_name:
-        raise HTTPException(status_code=400, detail="kind must be 'contact' or 'careers'")
-    docs = await db[coll_name].find({}, {"_id": 0}).sort("created_at", -1).to_list(5000)
-    buf = io.StringIO()
-    fields = ["id", "created_at", "name", "email", "company", "topic", "role", "linkedin", "message", "read"]
-    writer = csv.DictWriter(buf, fieldnames=fields, extrasaction="ignore")
-    writer.writeheader()
-    for d in docs:
-        writer.writerow(d)
-    return Response(
-        buf.getvalue(),
-        media_type="text/csv",
-        headers={"Content-Disposition": f'attachment; filename="autraxis-{kind}-submissions.csv"'},
-    )
-
-
-@api_router.get("/admin/analytics")
-async def analytics(days: int = 30, admin=Depends(get_current_admin)):
-    days = max(1, min(days, 365))
-    cutoff = (date.today() - timedelta(days=days)).isoformat()
-    docs = await db.analytics_pageviews.find({"day": {"$gte": cutoff}}, {"_id": 0}).to_list(100000)
-    by_path: dict = {}
-    by_day: dict = {}
-    for d in docs:
-        by_path[d["path"]] = by_path.get(d["path"], 0) + 1
-        by_day[d["day"]] = by_day.get(d["day"], 0) + 1
-    return {
-        "days": days,
-        "total": len(docs),
-        "by_path": sorted(([{"path": k, "views": v} for k, v in by_path.items()]), key=lambda x: -x["views"])[:20],
-        "by_day": sorted(([{"day": k, "views": v} for k, v in by_day.items()]), key=lambda x: x["day"])[-14:],
-    }
-
-
 app.include_router(api_router)
+app.include_router(make_admin_router(db, get_current_admin, require_cap, send_email, metrics, STARTED_AT))
 
 
 @app.middleware("http")
-async def security_headers(request: Request, call_next):
-    response = await call_next(request)
+async def observability_middleware(request: Request, call_next):
+    request.state.request_id = uuid.uuid4().hex[:12]
+    start = time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        metrics["err_total"] += 1
+        metrics["errors"].append({"ts": utcnow(), "path": request.url.path, "error": type(e).__name__})
+        logger.error(f"unhandled error on {request.url.path}: {e}")
+        raise
+    elapsed = (time.perf_counter() - start) * 1000
+    if request.url.path.startswith("/api"):
+        metrics["requests"] += 1
+        metrics["time_ms"] += elapsed
+        metrics["max_ms"] = max(metrics["max_ms"], elapsed)
+        if response.status_code >= 500:
+            metrics["err_total"] += 1
+            metrics["errors"].append({"ts": utcnow(), "path": request.url.path, "error": f"HTTP {response.status_code}"})
+    response.headers["X-Request-ID"] = request.state.request_id
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    if request.url.path.startswith("/api/admin"):
+        response.headers["X-Robots-Tag"] = "noindex, nofollow"
     return response
 
 

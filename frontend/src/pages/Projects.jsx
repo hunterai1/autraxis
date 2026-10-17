@@ -2,10 +2,11 @@ import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import PageHero from "@/components/PageHero";
 import { Reveal, Eyebrow } from "@/components/Reveal";
-import { projects } from "@/data/content";
+import { useProjects } from "@/data/useCms";
 import usePageMeta from "@/hooks/usePageMeta";
 
 const Projects = () => {
+  const projects = useProjects();
   usePageMeta("Projects & Demonstrations", "Architecture demonstrations and sandbox integration blueprints from AUTRAXIS — published to show how we think, not client engagements.");
 
   return (

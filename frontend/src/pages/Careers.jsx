@@ -1,17 +1,26 @@
 import { useState } from "react";
-import { CheckCircle2, Loader2, MapPin, Briefcase, Mail } from "lucide-react";
+import { CheckCircle2, Loader2, MapPin, Briefcase, Mail, CalendarClock } from "lucide-react";
 import { toast } from "sonner";
 import PageHero from "@/components/PageHero";
 import { Reveal, Eyebrow } from "@/components/Reveal";
 import { inputCls, labelCls, Honeypot } from "@/components/Form";
-import { roles } from "@/data/content";
+import { useContent } from "@/content/ContentContext";
 import usePageMeta from "@/hooks/usePageMeta";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const EMPTY = { name: "", email: "", role: "", linkedin: "", message: "", website: "" };
 
+const fmtClosing = (d) => {
+  try {
+    return new Date(d + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  } catch { return d; }
+};
+
 const Careers = () => {
   usePageMeta("Careers", "Remote-first engineering roles at AUTRAXIS: integration engineering, SAP connectivity and AI automation.");
+  const c = useContent();
+  const jobs = c?.jobs || [];
+  const careersEmail = c?.settings?.careers_email || "careers@autraxis.com";
   const [form, setForm] = useState(EMPTY);
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
@@ -34,7 +43,7 @@ const Careers = () => {
       setDone(true);
     } catch (err) {
       toast.error("We couldn't submit your application.", {
-        description: "Please try again, or email careers@autraxis.com directly.",
+        description: `Please try again, or email ${careersEmail} directly.`,
       });
     } finally {
       setSending(false);
@@ -56,42 +65,77 @@ const Careers = () => {
             <Eyebrow>Open roles</Eyebrow>
             <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">Current openings</h2>
           </Reveal>
-          <div className="mt-12 space-y-6">
-            {roles.map((r, i) => (
-              <Reveal key={r.id} delay={i * 0.05}>
-                <article className="rounded-2xl border border-hairline bg-[#FAFAFA] p-8 lg:p-10" data-testid={`role-card-${r.id}`}>
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-                    <div>
-                      <h3 className="font-display text-xl sm:text-2xl font-semibold text-slate-900">{r.title}</h3>
-                      <div className="mt-3 flex flex-wrap items-center gap-4 font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500">
-                        <span className="inline-flex items-center gap-1.5"><MapPin size={12} className="text-electric" /> {r.location}</span>
-                        <span className="inline-flex items-center gap-1.5"><Briefcase size={12} className="text-electric" /> {r.type}</span>
+
+          {jobs.length === 0 ? (
+            <Reveal>
+              <div className="mt-12 rounded-2xl border border-hairline bg-[#FAFAFA] p-10 text-center" data-testid="no-open-roles">
+                <p className="font-display text-xl font-semibold text-slate-900">No open roles right now</p>
+                <p className="mt-2 text-sm text-slate-600 max-w-md mx-auto">
+                  We hire selectively. Send a general application below — we read every one and keep promising profiles on file.
+                </p>
+              </div>
+            </Reveal>
+          ) : (
+            <div className="mt-12 space-y-6" data-testid="jobs-list">
+              {jobs.map((j, i) => (
+                <Reveal key={j.id} delay={i * 0.05}>
+                  <article className="rounded-2xl border border-hairline bg-[#FAFAFA] p-8 lg:p-10" data-testid={`job-card-${j.id}`}>
+                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+                      <div>
+                        <h3 className="font-display text-xl sm:text-2xl font-semibold text-slate-900">{j.title}</h3>
+                        <div className="mt-3 flex flex-wrap items-center gap-4 font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                          <span className="inline-flex items-center gap-1.5"><MapPin size={12} className="text-electric" /> {j.location}</span>
+                          <span className="inline-flex items-center gap-1.5"><Briefcase size={12} className="text-electric" /> {j.employment_type}</span>
+                          {j.department && <span>{j.department}</span>}
+                          {j.closing_date && (
+                            <span className="inline-flex items-center gap-1.5 text-amber-600">
+                              <CalendarClock size={12} /> Closes {fmtClosing(j.closing_date)}
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-4 text-sm sm:text-base leading-relaxed text-slate-600 max-w-3xl">{j.description}</p>
                       </div>
-                      <p className="mt-4 text-sm sm:text-base leading-relaxed text-slate-600 max-w-3xl">{r.summary}</p>
+                      <a
+                        href="#apply"
+                        data-testid={`job-apply-${j.id}`}
+                        onClick={() => setForm((f) => ({ ...f, role: j.title }))}
+                        className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 text-white text-sm font-semibold transition-colors hover:bg-electric"
+                      >
+                        Apply for this role
+                      </a>
                     </div>
-                    <a
-                      href="#apply"
-                      data-testid={`role-apply-${r.id}`}
-                      onClick={() => setForm((f) => ({ ...f, role: r.title }))}
-                      className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 text-white text-sm font-semibold transition-colors hover:bg-electric"
-                    >
-                      Apply for this role
-                    </a>
-                  </div>
-                  <div className="mt-6 pt-6 border-t border-hairline">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-500 mb-3">What you'll need</p>
-                    <ul className="grid sm:grid-cols-2 gap-2.5">
-                      {r.musts.map((m) => (
-                        <li key={m} className="flex gap-2.5 text-sm leading-relaxed text-slate-600">
-                          <CheckCircle2 size={16} className="text-cyanglow shrink-0 mt-0.5" /> {m}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </article>
-              </Reveal>
-            ))}
-          </div>
+                    {(j.requirements || []).length > 0 && (
+                      <div className="mt-6 pt-6 border-t border-hairline">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-500 mb-3">What you'll need</p>
+                        <ul className="grid sm:grid-cols-2 gap-2.5">
+                          {j.requirements.map((m) => (
+                            <li key={m} className="flex gap-2.5 text-sm leading-relaxed text-slate-600">
+                              <CheckCircle2 size={16} className="text-cyanglow shrink-0 mt-0.5" /> {m}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {(j.responsibilities || []).length > 0 && (
+                      <div className="mt-6">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-500 mb-3">What you'll do</p>
+                        <ul className="grid gap-2.5">
+                          {j.responsibilities.map((r) => (
+                            <li key={r} className="flex gap-2.5 text-sm leading-relaxed text-slate-600">
+                              <CheckCircle2 size={16} className="text-electric shrink-0 mt-0.5" /> {r}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {j.instructions && (
+                      <p className="mt-6 text-xs text-slate-500 italic">{j.instructions}</p>
+                    )}
+                  </article>
+                </Reveal>
+              ))}
+            </div>
+          )}
 
           <Reveal delay={0.1}>
             <div className="mt-16 grid lg:grid-cols-5 gap-10 items-start" id="apply">
@@ -103,7 +147,7 @@ const Careers = () => {
                 <p className="mt-4 text-sm leading-relaxed text-slate-600">
                   No cover letter theatre. Tell us what you've built, what broke, and what you learned.
                   Applications are reviewed by engineers and every one gets a reply. Prefer email? Write to
-                  <a href="mailto:careers@autraxis.com" data-testid="careers-direct-email" className="text-electric underline underline-offset-2 ml-1">careers@autraxis.com</a>.
+                  <a href={`mailto:${careersEmail}`} data-testid="careers-direct-email" className="text-electric underline underline-offset-2 ml-1">{careersEmail}</a>.
                 </p>
               </div>
 
@@ -139,7 +183,7 @@ const Careers = () => {
                         <label htmlFor="careers-role" className={labelCls}>Role *</label>
                         <select id="careers-role" data-testid="careers-role-select" required className={inputCls} value={form.role} onChange={set("role")}>
                           <option value="" disabled>Select a role</option>
-                          {roles.map((r) => <option key={r.id} value={r.title}>{r.title}</option>)}
+                          {jobs.map((j) => <option key={j.id} value={j.title}>{j.title}</option>)}
                           <option value="General application">General application</option>
                         </select>
                       </div>

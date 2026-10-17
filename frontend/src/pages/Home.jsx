@@ -4,11 +4,26 @@ import { ArrowRight, ArrowUpRight, CheckCircle2, Terminal } from "lucide-react";
 import { MaskedLines, Reveal, Eyebrow } from "@/components/Reveal";
 import Marquee from "@/components/Marquee";
 import NetworkDiagram from "@/components/NetworkDiagram";
-import { services, solutions, insights } from "@/data/content";
+import ServiceIcon from "@/components/ServiceIcon";
+import { useContent } from "@/content/ContentContext";
+import { useServices, useSolutions, useInsights } from "@/data/useCms";
 import usePageMeta from "@/hooks/usePageMeta";
 
 const Home = () => {
   usePageMeta(null, "AUTRAXIS is a remote-first enterprise integration and AI technology practice: Dell Boomi iPaaS, SAP connectivity, B2B EDI, API engineering, cloud integration and intelligent automation.");
+  const c = useContent();
+  const home = c?.home || {};
+  const services = useServices();
+  const solutions = useSolutions();
+  const insights = useInsights();
+
+  const heroLines = Array.isArray(home.hero_lines) && home.hero_lines.length >= 2
+    ? home.hero_lines : ["Intelligence.", "Integrated."];
+  const eyebrow = home.eyebrow || "Enterprise Integration & AI Technology";
+  const subtitle = home.subtitle || "AUTRAXIS connects the systems your business already runs on — ERP, partners, cloud, data — and makes the space between them intelligent. Remote-first. Engineering-grade. Explained in plain language.";
+  const primaryCta = home.primary_cta || "Explore capabilities";
+  const secondaryCta = home.secondary_cta || "Talk to an engineer";
+  const diagramCaption = home.diagram_caption || "Reference architecture — select any node to inspect a payload";
 
   return (
     <div data-testid="home-page">
@@ -26,11 +41,11 @@ const Home = () => {
             className="font-mono text-xs uppercase tracking-[0.35em] text-cyanglow mb-6"
             data-testid="hero-eyebrow"
           >
-            Enterprise Integration &amp; AI Technology
+            {eyebrow}
           </motion.p>
 
           <MaskedLines
-            lines={["Intelligence.", "Integrated."]}
+            lines={heroLines}
             className="font-display text-5xl sm:text-6xl lg:text-8xl font-extrabold tracking-tight leading-[1.02] text-frost"
             lineClassName="last:text-gradient-cyan"
           />
@@ -42,8 +57,7 @@ const Home = () => {
             className="mt-7 max-w-2xl text-base sm:text-lg leading-relaxed text-mist"
             data-testid="hero-subtitle"
           >
-            AUTRAXIS connects the systems your business already runs on — ERP, partners, cloud, data —
-            and makes the space between them intelligent. Remote-first. Engineering-grade. Explained in plain language.
+            {subtitle}
           </motion.p>
 
           <motion.div
@@ -57,14 +71,14 @@ const Home = () => {
               data-testid="hero-explore-services-cta"
               className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-electric text-white font-semibold transition-all duration-200 hover:bg-cyanglow hover:text-abyss hover:shadow-[0_0_32px_rgba(6,182,212,0.5)]"
             >
-              Explore capabilities <ArrowRight size={17} />
+              {primaryCta} <ArrowRight size={17} />
             </Link>
             <Link
               to="/contact"
               data-testid="hero-contact-cta"
               className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border border-cyan-500/40 text-cyan-300 font-semibold transition-colors duration-200 hover:bg-cyan-500/10 hover:border-cyan-400"
             >
-              Talk to an engineer <ArrowUpRight size={17} />
+              {secondaryCta} <ArrowUpRight size={17} />
             </Link>
           </motion.div>
         </div>
@@ -77,7 +91,7 @@ const Home = () => {
         >
           <NetworkDiagram interactive />
           <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500">
-            Reference architecture — select any node to inspect a payload
+            {diagramCaption}
           </p>
         </motion.div>
       </section>
@@ -102,14 +116,14 @@ const Home = () => {
 
           <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((s, i) => (
-              <Reveal key={s.slug} delay={i * 0.06}>
+              <Reveal key={s.slug || s.id} delay={i * 0.06}>
                 <Link
                   to={`/services/${s.slug}`}
                   data-testid={`service-card-${s.slug}`}
                   className="group flex flex-col h-full rounded-2xl border border-hairline bg-white p-7 transition-all duration-300 hover:border-cyan-500/50 hover:shadow-[0_12px_48px_rgba(37,99,235,0.12)] hover:-translate-y-1"
                 >
                   <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center mb-6 transition-colors duration-300 group-hover:bg-electric">
-                    <s.icon size={22} className="text-cyanglow" />
+                    <ServiceIcon slug={s.slug} size={22} />
                   </div>
                   <h3 className="font-display text-xl font-semibold text-slate-900">{s.name}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-slate-600 flex-1">{s.short}</p>

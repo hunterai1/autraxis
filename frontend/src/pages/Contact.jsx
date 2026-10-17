@@ -5,6 +5,7 @@ import PageHero from "@/components/PageHero";
 import { Reveal, Eyebrow } from "@/components/Reveal";
 import { inputCls, labelCls, Honeypot } from "@/components/Form";
 import { TOPICS } from "@/data/content";
+import { useContent } from "@/content/ContentContext";
 import usePageMeta from "@/hooks/usePageMeta";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -12,6 +13,9 @@ const EMPTY = { name: "", email: "", company: "", topic: TOPICS[0], message: "",
 
 const Contact = () => {
   usePageMeta("Contact", "Start a conversation with AUTRAXIS about enterprise integration, Dell Boomi, SAP connectivity, EDI, cloud architecture or AI automation.");
+  const c = useContent();
+  const infoEmail = c?.settings?.info_email || "info@autraxis.com";
+  const careersEmail = c?.settings?.careers_email || "careers@autraxis.com";
   const [form, setForm] = useState(EMPTY);
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
@@ -34,7 +38,7 @@ const Contact = () => {
       setDone(true);
     } catch (err) {
       toast.error("We couldn't send your message.", {
-        description: "Please try again, or email info@autraxis.com directly.",
+        description: `Please try again, or email ${infoEmail} directly.`,
       });
     } finally {
       setSending(false);
@@ -59,25 +63,25 @@ const Contact = () => {
             </h2>
             <div className="mt-8 space-y-5">
               <a
-                href="mailto:info@autraxis.com"
+                href={`mailto:${infoEmail}`}
                 data-testid="contact-info-email"
                 className="flex items-center gap-4 rounded-2xl border border-hairline bg-[#FAFAFA] p-5 transition-colors hover:border-cyan-500/50"
               >
                 <Mail size={20} className="text-electric shrink-0" />
                 <div>
                   <p className="font-semibold text-slate-900 text-sm">General inquiries</p>
-                  <p className="text-sm text-electric">info@autraxis.com</p>
+                  <p className="text-sm text-electric">{infoEmail}</p>
                 </div>
               </a>
               <a
-                href="mailto:careers@autraxis.com"
+                href={`mailto:${careersEmail}`}
                 data-testid="contact-careers-email"
                 className="flex items-center gap-4 rounded-2xl border border-hairline bg-[#FAFAFA] p-5 transition-colors hover:border-cyan-500/50"
               >
                 <Mail size={20} className="text-electric shrink-0" />
                 <div>
                   <p className="font-semibold text-slate-900 text-sm">Careers &amp; recruitment</p>
-                  <p className="text-sm text-electric">careers@autraxis.com</p>
+                  <p className="text-sm text-electric">{careersEmail}</p>
                 </div>
               </a>
               <div className="flex items-center gap-4 rounded-2xl border border-hairline bg-[#FAFAFA] p-5">
@@ -106,7 +110,7 @@ const Contact = () => {
                   <h2 className="mt-6 font-display text-3xl font-bold text-frost">Message received.</h2>
                   <p className="mt-3 text-mist max-w-md leading-relaxed">
                     Thank you — your inquiry is in our queue and an engineer will reply within two business days.
-                    If it's urgent, email info@autraxis.com directly.
+                    If it's urgent, email {infoEmail} directly.
                   </p>
                   <button
                     type="button"

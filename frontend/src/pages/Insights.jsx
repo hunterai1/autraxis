@@ -2,13 +2,14 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import PageHero from "@/components/PageHero";
 import { Reveal } from "@/components/Reveal";
-import { insights } from "@/data/content";
+import { useInsights } from "@/data/useCms";
 import usePageMeta from "@/hooks/usePageMeta";
 
 const formatDate = (iso) =>
   new Date(iso + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
 const Insights = () => {
+  const insights = useInsights();
   usePageMeta("Insights", "Technical articles on iPaaS migration, SAP BTP integration and event-driven EDI from AUTRAXIS engineers.");
 
   return (

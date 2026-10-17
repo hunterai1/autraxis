@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
 import Lenis from "lenis";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
+import { ContentProvider } from "@/content/ContentContext";
 import Home from "@/pages/Home";
 import Services from "@/pages/Services";
 import ServiceDetail from "@/pages/ServiceDetail";
@@ -18,9 +19,21 @@ import Contact from "@/pages/Contact";
 import Careers from "@/pages/Careers";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
-import AdminLogin from "@/pages/AdminLogin";
-import AdminInbox from "@/pages/AdminInbox";
 import NotFound from "@/pages/NotFound";
+import AdminLayout from "@/admin/AdminLayout";
+import AdminLogin from "@/admin/Login";
+import AdminForgot from "@/admin/Forgot";
+import AdminReset from "@/admin/Reset";
+import Dashboard from "@/admin/Dashboard";
+import Submissions from "@/admin/Submissions";
+import ContentHome from "@/admin/ContentHome";
+import SingletonEditor from "@/admin/SingletonEditor";
+import CollectionManager from "@/admin/CollectionManager";
+import Users from "@/admin/Users";
+import Audit from "@/admin/Audit";
+import Monitoring from "@/admin/Monitoring";
+import AdminSettings from "@/admin/Settings";
+import AdminSecurity from "@/admin/Security";
 
 const ScrollManager = () => {
   const { pathname } = useLocation();
@@ -43,6 +56,45 @@ const PageviewTracker = () => {
   return null;
 };
 
+const SingletonRoute = () => {
+  const { key } = useParams();
+  return <SingletonEditor contentKey={key} />;
+};
+
+const CollectionRoute = () => {
+  const { name } = useParams();
+  return <CollectionManager name={name} />;
+};
+
+const PublicSite = () => (
+  <>
+    <a href="#main-content" className="skip-link" data-testid="skip-to-content-link">
+      Skip to main content
+    </a>
+    <PageviewTracker />
+    <Header />
+    <main id="main-content">
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/services/:slug" element={<ServiceDetail />} />
+        <Route path="/solutions" element={<Solutions />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/projects/:slug" element={<ProjectDetail />} />
+        <Route path="/insights" element={<Insights />} />
+        <Route path="/insights/:slug" element={<InsightDetail />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/careers" element={<Careers />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </main>
+    <Footer />
+  </>
+);
+
 function App() {
   useEffect(() => {
     const lenis = new Lenis({ duration: 1.15, smoothWheel: true });
@@ -61,34 +113,30 @@ function App() {
   return (
     <div className="App">
       <BrowserRouter>
-        <a href="#main-content" className="skip-link" data-testid="skip-to-content-link">
-          Skip to main content
-        </a>
-        <ScrollManager />
-        <PageviewTracker />
-        <Header />
-        <main id="main-content">
+        <ContentProvider>
+          <ScrollManager />
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/services/:slug" element={<ServiceDetail />} />
-            <Route path="/solutions" element={<Solutions />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/projects/:slug" element={<ProjectDetail />} />
-            <Route path="/insights" element={<Insights />} />
-            <Route path="/insights/:slug" element={<InsightDetail />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/careers" element={<Careers />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/inbox" element={<AdminInbox />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/forgot" element={<AdminForgot />} />
+            <Route path="/admin/reset" element={<AdminReset />} />
+            <Route path="/admin/inbox" element={<Navigate to="/admin" replace />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="inquiries" element={<Submissions kind="inquiries" />} />
+              <Route path="applications" element={<Submissions kind="applications" />} />
+              <Route path="content" element={<ContentHome />} />
+              <Route path="content/:key" element={<SingletonRoute />} />
+              <Route path="collection/:name" element={<CollectionRoute />} />
+              <Route path="users" element={<Users />} />
+              <Route path="audit" element={<Audit />} />
+              <Route path="monitoring" element={<Monitoring />} />
+              <Route path="settings" element={<AdminSettings />} />
+              <Route path="security" element={<AdminSecurity />} />
+            </Route>
+            <Route path="/*" element={<PublicSite />} />
           </Routes>
-        </main>
-        <Footer />
-        <Toaster position="bottom-right" theme="dark" />
+          <Toaster position="bottom-right" theme="dark" />
+        </ContentProvider>
       </BrowserRouter>
     </div>
   );

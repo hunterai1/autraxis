@@ -367,6 +367,15 @@ export const roles = [
   },
 ];
 
+export const SERVICE_ICONS = {
+  "dell-boomi": Workflow,
+  "sap-connectivity": Database,
+  "edi-supply-chain": ArrowLeftRight,
+  "cloud-integration": Cloud,
+  "api-engineering": Braces,
+  "ai-automation": Bot,
+};
+
 export const TOPICS = [
   "Enterprise integration",
   "Dell Boomi iPaaS",

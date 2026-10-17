@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 import Logo from "@/components/Logo";
+import { useContent } from "@/content/ContentContext";
 
 const NAV = [
   { label: "Services", to: "/services", id: "services" },
@@ -16,6 +17,8 @@ const NAV = [
 const Header = () => {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
+  const c = useContent();
+  const ctaText = c?.settings?.cta_text || "{ctaText}";
 
   useEffect(() => {
     setOpen(false);
@@ -53,7 +56,7 @@ const Header = () => {
             data-testid="nav-contact-cta"
             className="ml-3 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-electric text-white text-sm font-semibold transition-all duration-200 hover:bg-cyanglow hover:text-abyss hover:shadow-[0_0_24px_rgba(6,182,212,0.45)]"
           >
-            Start a conversation
+            {ctaText}
             <ArrowUpRight size={15} />
           </Link>
         </nav>
@@ -103,7 +106,7 @@ const Header = () => {
                 data-testid="mobile-nav-contact-cta"
                 className="mt-3 inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-full bg-electric text-white font-semibold hover:bg-cyanglow hover:text-abyss transition-colors"
               >
-                Start a conversation
+                {ctaText}
                 <ArrowUpRight size={16} />
               </Link>
             </div>

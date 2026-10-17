@@ -1,0 +1,526 @@
+{
+ "services": [
+  {
+   "slug": "dell-boomi",
+   "name": "Dell Boomi iPaaS",
+   "short": "Design, build and operate Boomi AtomSphere integrations — from single processes to enterprise-wide hubs.",
+   "summary": "Dell Boomi AtomSphere is the connective tissue of many modern enterprises. We design integration processes that are readable, testable and built to be handed over — not black boxes only one consultant understands. From connector configuration to Atom and Molecule topology, we treat your iPaaS layer as production engineering, not configuration plumbing.",
+   "deliverables": [
+    "Integration process design with clear naming, versioning and environment strategy",
+    "Connector architecture for SAP, databases, flat files, REST and SOAP endpoints",
+    "Atom, Molecule and Atom Cloud topology planning for your throughput needs",
+    "Document mapping and transformation logic with peer-reviewed test coverage",
+    "Deployment pipelines and environment promotion workflows",
+    "Runbooks and handover documentation your own team can actually use"
+   ],
+   "approach": [
+    {
+     "title": "Discover",
+     "text": "We map the systems, documents and teams involved before touching the platform — so the design reflects how your business actually moves data."
+    },
+    {
+     "title": "Design",
+     "text": "Process flows, error handling and retry behaviour are drawn up first and reviewed with your stakeholders in plain language."
+    },
+    {
+     "title": "Build",
+     "text": "Processes are built iteratively with working demos early, so surprises surface in week one — not week twelve."
+    },
+    {
+     "title": "Operate",
+     "text": "Monitoring, alerting and clear ownership mean the integration keeps working long after go-live."
+    }
+   ],
+   "stack": [
+    "Dell Boomi AtomSphere",
+    "Boomi Flow",
+    "REST / SOAP",
+    "EDI",
+    "Groovy scripting",
+    "Atom & Molecule"
+   ]
+  },
+  {
+   "slug": "sap-connectivity",
+   "name": "SAP Connectivity",
+   "short": "Bridge SAP S/4HANA and ECC with the rest of your landscape — IDocs, BAPIs, OData and event-driven patterns.",
+   "summary": "SAP sits at the centre of many enterprises — and too often at the centre of integration bottlenecks. We connect SAP to cloud applications, partners and data platforms using the right mechanism for each job: IDocs for document flows, OData and REST for real-time queries, events for decoupled architectures. We also help teams plan the move from PI/PO to SAP Integration Suite on BTP.",
+   "deliverables": [
+    "IDoc, BAPI/RFC and OData interface design for S/4HANA and ECC landscapes",
+    "SAP Integration Suite (CPI) and API Management implementation on BTP",
+    "PI/PO-to-BTP migration planning with interface inventory and risk mapping",
+    "Partner-facing SAP integration via iPaaS platforms such as Dell Boomi",
+    "Master data synchronisation patterns across SAP and non-SAP systems",
+    "Interface monitoring and alerting that your operations team owns"
+   ],
+   "approach": [
+    {
+     "title": "Inventory",
+     "text": "A complete, honest inventory of existing interfaces — including the undocumented ones everyone forgot about."
+    },
+    {
+     "title": "Classify",
+     "text": "Each interface is classified by criticality, volume and fit for modernisation, so effort goes where it matters."
+    },
+    {
+     "title": "Modernise",
+     "text": "High-value flows are rebuilt on current patterns; stable legacy flows are left alone or wrapped, not rewritten for fashion."
+    },
+    {
+     "title": "Govern",
+     "text": "Naming standards, ownership and monitoring keep the landscape understandable as it grows."
+    }
+   ],
+   "stack": [
+    "SAP S/4HANA",
+    "SAP BTP",
+    "Integration Suite / CPI",
+    "IDoc",
+    "OData",
+    "RFC / BAPI"
+   ]
+  },
+  {
+   "slug": "edi-supply-chain",
+   "name": "B2B EDI & Supply Chain",
+   "short": "Reliable partner document exchange — X12, EDIFACT, AS2 — without the operational mystery.",
+   "summary": "EDI still moves the world's orders, invoices and shipment notices — and it still breaks in ways that cost real money. We build EDI pipelines where every document is traceable, every failure is explainable, and onboarding a new trading partner is a process, not a project. Business-friendly on the outside, engineering-grade underneath.",
+   "deliverables": [
+    "X12 and EDIFACT mapping for order-to-cash and procure-to-pay flows",
+    "AS2 and SFTP connectivity with certificate lifecycle management",
+    "Trading partner onboarding playbooks and conformance testing",
+    "Document tracking dashboards your operations team can self-serve",
+    "Exception handling workflows that route failures to humans who can fix them",
+    "VAN migration and consolidation assessments"
+   ],
+   "approach": [
+    {
+     "title": "Map the flow",
+     "text": "We document each partner, document type and business rule — the map your team wishes existed."
+    },
+    {
+     "title": "Standardise",
+     "text": "Canonical models and reusable maps mean partner ten is a fraction of the effort of partner one."
+    },
+    {
+     "title": "Test with partners",
+     "text": "Structured conformance testing with each trading partner before anything goes live."
+    },
+    {
+     "title": "Make it visible",
+     "text": "Dashboards and alerts replace the inbox archaeology that usually passes for EDI support."
+    }
+   ],
+   "stack": [
+    "X12",
+    "EDIFACT",
+    "AS2 / AS4",
+    "SFTP",
+    "Dell Boomi EDI",
+    "VAN networks"
+   ]
+  },
+  {
+   "slug": "cloud-integration",
+   "name": "Cloud Integration Architecture",
+   "short": "Hybrid and multi-cloud integration patterns that survive contact with production.",
+   "summary": "Most enterprises live in a hybrid reality: some systems in the cloud, some on-premises, none of them going anywhere soon. We design integration architectures for that reality — event-driven where it helps, simple request-response where it doesn't, and always with security, cost and operability in the frame.",
+   "deliverables": [
+    "Target-state integration architecture with clear decision records",
+    "Event-driven patterns using queues, streams and pub/sub where they earn their keep",
+    "Hybrid connectivity design across on-premises, private and public cloud",
+    "Data pipeline design feeding lakes, warehouses and operational stores",
+    "Security architecture: identity, encryption, network segmentation, secrets handling",
+    "Cost modelling so the architecture is affordable to run, not just to build"
+   ],
+   "approach": [
+    {
+     "title": "Understand constraints",
+     "text": "Latency, compliance, budget and team skills are design inputs — not afterthoughts."
+    },
+    {
+     "title": "Choose boring where possible",
+     "text": "We recommend proven patterns over fashionable ones, and say so when simple beats clever."
+    },
+    {
+     "title": "Prove it",
+     "text": "Reference implementations and load tests de-risk the design before broad rollout."
+    },
+    {
+     "title": "Document decisions",
+     "text": "Every significant trade-off is written down so future teams inherit understanding, not archaeology."
+    }
+   ],
+   "stack": [
+    "AWS",
+    "Microsoft Azure",
+    "Event queues & streams",
+    "Kubernetes",
+    "Terraform",
+    "Private link / VPN"
+   ]
+  },
+  {
+   "slug": "api-engineering",
+   "name": "API Engineering & Management",
+   "short": "APIs designed as products — documented, versioned, secured and pleasant to consume.",
+   "summary": "An API is a promise to every team and partner who builds on it. We design REST and event APIs with contract-first discipline: OpenAPI specifications before code, versioning that respects consumers, and security that doesn't punish legitimate use. Then we help you run them — gateways, developer portals, analytics and all.",
+   "deliverables": [
+    "Contract-first API design with OpenAPI specifications and style guides",
+    "Gateway and management layer setup: authentication, throttling, analytics",
+    "OAuth 2.0 / OIDC security design appropriate to your risk profile",
+    "Developer documentation and sandbox environments for consumers",
+    "Versioning and deprecation policies that treat consumers as customers",
+    "Legacy service wrapping to expose modern API contracts over older systems"
+   ],
+   "approach": [
+    {
+     "title": "Design the contract",
+     "text": "The OpenAPI spec is written and reviewed before implementation begins — consumers included in the review."
+    },
+    {
+     "title": "Build to the spec",
+     "text": "Implementation follows the contract, with automated checks to keep them from drifting apart."
+    },
+    {
+     "title": "Secure by default",
+     "text": "Authentication, authorisation and rate limiting are designed in, not bolted on."
+    },
+    {
+     "title": "Run it like a product",
+     "text": "Analytics, feedback loops and clear ownership keep the API healthy for years."
+    }
+   ],
+   "stack": [
+    "OpenAPI",
+    "REST",
+    "OAuth 2.0 / OIDC",
+    "API gateways",
+    "Developer portals",
+    "Contract testing"
+   ]
+  },
+  {
+   "slug": "ai-automation",
+   "name": "AI & Intelligent Automation",
+   "short": "Pragmatic AI applied to integration and operations — classification, extraction, monitoring, remediation.",
+   "summary": "AI earns its place in the enterprise when it removes specific, measurable friction — not when it's sprinkled on a slide deck. We apply language models and automation to the unglamorous places where they genuinely help: reading unstructured documents into structured flows, triaging integration failures, drafting mappings, and watching pipelines so humans don't have to stare at dashboards.",
+   "deliverables": [
+    "Document understanding pipelines: PDFs, emails and forms into structured data",
+    "AI-assisted data classification and mapping suggestions inside integration flows",
+    "Intelligent monitoring that summarises failures in plain language for operators",
+    "Automated remediation playbooks for well-understood failure modes",
+    "Human-in-the-loop design so AI output is reviewed where it matters",
+    "Evaluation harnesses to measure automation quality before you trust it"
+   ],
+   "approach": [
+    {
+     "title": "Find the friction",
+     "text": "We look for repetitive, rules-tolerant work where errors are cheap to catch — the honest sweet spot for AI."
+    },
+    {
+     "title": "Prototype small",
+     "text": "A narrow proof of concept with real data and a clear quality bar, not a demo on curated samples."
+    },
+    {
+     "title": "Measure, then scale",
+     "text": "Accuracy and cost are measured in production-like conditions before anything scales."
+    },
+    {
+     "title": "Keep humans in charge",
+     "text": "Automation handles the routine; people handle judgement. The boundary is explicit."
+    }
+   ],
+   "stack": [
+    "LLM pipelines",
+    "Document extraction",
+    "Workflow automation",
+    "Observability",
+    "Evaluation frameworks",
+    "Human-in-the-loop"
+   ]
+  }
+ ],
+ "solutions": [
+  {
+   "id": "manufacturing",
+   "industry": "Manufacturing",
+   "title": "ERP-to-shop-floor and supplier connectivity",
+   "summary": "Representative architecture for manufacturers connecting SAP with MES systems, suppliers and logistics partners — production orders down, confirmations and shipment notices back up, with full traceability.",
+   "flow": [
+    "SAP production orders",
+    "Boomi process orchestration",
+    "MES / shop-floor systems",
+    "Supplier EDI (DESADV / 856)",
+    "Exception dashboard"
+   ],
+   "stack": [
+    "SAP S/4HANA",
+    "Dell Boomi",
+    "EDI X12 / EDIFACT",
+    "AS2"
+   ]
+  },
+  {
+   "id": "retail-distribution",
+   "industry": "Retail & Distribution",
+   "title": "Order-to-cash EDI without the chaos",
+   "summary": "Representative architecture for distributors managing dozens of trading partners: orders in (850), acknowledgements out (855), ship notices and invoices automated — every document visible to the operations team.",
+   "flow": [
+    "Retailer purchase orders",
+    "EDI gateway & mapping",
+    "ERP order creation",
+    "Ship notice & invoice",
+    "Partner conformance reporting"
+   ],
+   "stack": [
+    "X12 850 / 855 / 856 / 810",
+    "Dell Boomi EDI",
+    "AS2 / VAN",
+    "ERP integration"
+   ]
+  },
+  {
+   "id": "healthcare",
+   "industry": "Healthcare & Life Sciences",
+   "title": "Secure data exchange across clinical and business systems",
+   "summary": "Representative architecture for healthcare suppliers and service providers moving data between clinical systems, ERPs and partners — with audit trails, encryption and clear data governance at every hop.",
+   "flow": [
+    "Source systems & files",
+    "Validation & transformation",
+    "Secure transport (SFTP / AS2)",
+    "Target applications",
+    "Audit & compliance log"
+   ],
+   "stack": [
+    "HL7-adjacent data exchange",
+    "Secure file transfer",
+    "Boomi integration",
+    "Audit logging"
+   ]
+  },
+  {
+   "id": "financial-services",
+   "industry": "Financial Services",
+   "title": "Middleware for regulated environments",
+   "summary": "Representative architecture for financial operations connecting core platforms, data providers and reporting systems — designed for change control, evidence and operational resilience from day one.",
+   "flow": [
+    "Core platform events",
+    "Message queues & routing",
+    "Data transformation",
+    "Reporting & risk systems",
+    "Immutable audit trail"
+   ],
+   "stack": [
+    "Event-driven messaging",
+    "API management",
+    "Data pipelines",
+    "Governance tooling"
+   ]
+  }
+ ],
+ "projects": [
+  {
+   "id": "sap-boomi-order-sync",
+   "title": "SAP ↔ Boomi Order Synchronisation Blueprint",
+   "description": "A reference integration blueprint showing how sales orders flow from a commerce API into SAP S/4HANA via Dell Boomi — including canonical order model, error queues, idempotency handling and operator replay.",
+   "tech": [
+    "Dell Boomi",
+    "SAP OData",
+    "Canonical data model",
+    "Error replay"
+   ],
+   "highlights": [
+    "Canonical order schema decouples the storefront contract from SAP internals",
+    "Failed documents park in a review queue with one-click replay after fix",
+    "Every run produces a traceable correlation ID end to end"
+   ]
+  },
+  {
+   "id": "edi-flow-sandbox",
+   "title": "EDI 850/855/856 Flow Sandbox",
+   "description": "A sandbox model of a complete order-to-shipment EDI conversation: purchase order ingestion, acknowledgement generation, and advance ship notice assembly — with document-level visibility at each state transition.",
+   "tech": [
+    "X12 850 / 855 / 856",
+    "AS2 transport",
+    "State machine",
+    "Document tracking"
+   ],
+   "highlights": [
+    "Document state machine makes every order's position obvious to operators",
+    "Auto-acknowledgement rules configurable per trading partner",
+    "Audit view reconstructs any document conversation in seconds"
+   ]
+  },
+  {
+   "id": "event-driven-inventory",
+   "title": "Event-Driven Inventory Monitor",
+   "description": "A monitoring blueprint where inventory movements publish events to a stream, an automation layer evaluates thresholds, and an AI agent summarises anomalies for the operations team instead of paging them with raw logs.",
+   "tech": [
+    "Event streaming",
+    "Threshold automation",
+    "AI summarisation",
+    "Alert routing"
+   ],
+   "highlights": [
+    "Events decouple producers from every downstream consumer",
+    "Anomaly summaries arrive in plain language with source links",
+    "Thresholds are configuration, not code — operators own them"
+   ]
+  }
+ ],
+ "insights": [
+  {
+   "slug": "ipaas-migration-playbook",
+   "title": "The iPaaS Migration Playbook: Moving to Dell Boomi Without Breaking the Business",
+   "tag": "iPaaS Strategy",
+   "date": "2026-05-14",
+   "minutes": 9,
+   "excerpt": "Legacy middleware migrations fail when teams treat them as lift-and-shift exercises. Here's the inventory-first, strangler-pattern approach that keeps the business running while the platform changes underneath it.",
+   "sections": [
+    {
+     "heading": "Start with an honest inventory",
+     "body": [
+      "Every middleware estate has two interfaces: the ones in the documentation, and the ones actually running. Before any migration planning, build a complete inventory from the running systems — scheduled jobs, file drops, forgotten SFTP endpoints, the flow someone built in 2019 that finance now depends on.",
+      "Classify each interface on three axes: business criticality, technical complexity, and change frequency. This classification drives everything else. High-criticality, low-change interfaces are strangler candidates — wrap and proxy them first. Frequently changed flows are rewritten early, while knowledge is fresh."
+     ]
+    },
+    {
+     "heading": "Strangle, don't big-bang",
+     "body": [
+      "The strangler pattern applies to integration platforms just as it does to applications. Stand up the new Boomi environment alongside the legacy platform and move interfaces one at a time, starting with low-risk flows to build team confidence and operational muscle.",
+      "Run parallel where the risk justifies it: critical financial interfaces can execute on both platforms with reconciliation comparing outputs, until confidence is earned and the legacy path is retired."
+     ]
+    },
+    {
+     "heading": "Design for the new platform, not the old one",
+     "body": [
+      "The most expensive migration mistake is re-creating legacy design decisions on a modern platform. Legacy middleware often forces point-to-point thinking; iPaaS platforms reward canonical models, reusable subprocesses and shared error handling. Take the discount the new platform offers.",
+      "That said, modernise deliberately. Rewriting a stable, well-understood interface just to use new features is risk without reward. Change what the move forces you to change; improve what clearly deserves it."
+     ]
+    },
+    {
+     "heading": "Operational readiness is the real go-live",
+     "body": [
+      "A migration isn't done when interfaces run — it's done when the operations team can run them. Invest in monitoring, alerting, naming standards and runbooks during the build, not after. The goal is an estate your own people understand without calling the migration partner."
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "sap-btp-integration-suite-transition",
+   "title": "PI/PO to SAP Integration Suite: Planning the Transition While There's Still Time",
+   "tag": "SAP Architecture",
+   "date": "2026-04-02",
+   "minutes": 8,
+   "excerpt": "SAP Process Orchestration's maintenance horizon is fixed. Teams that start planning early get to choose their pace; teams that don't get the pace chosen for them. A practical framing of the move to Integration Suite on BTP.",
+   "sections": [
+    {
+     "heading": "Why the timeline matters more than the tooling",
+     "body": [
+      "SAP has set the maintenance window for PI/PO, and extended maintenance is a cost decision, not a strategy. The transition to Integration Suite (Cloud Integration, API Management and related capabilities on BTP) is genuinely a different platform — different runtime model, different artefact types, different operations.",
+      "The practical implication: treat this as a multi-quarter programme with an early, cheap discovery phase. The expensive surprises in these projects are always discovered late and always involve interfaces nobody documented."
+     ]
+    },
+    {
+     "heading": "Not every interface should move",
+     "body": [
+      "A transition is a rare opportunity to delete. Interfaces that exist because a project ended years ago, or because a manual process was automated and then un-automated, should be retired rather than migrated. Our rule of thumb: if you can't find an owner for an interface, that's the answer.",
+      "For the interfaces that do move, decide per-flow: rebuild natively on Integration Suite, or route via an iPaaS layer like Dell Boomi where the interface is really about connecting SAP to the non-SAP world. Hybrid is normal and legitimate — dogma is the enemy here."
+     ]
+    },
+    {
+     "heading": "Build the operating model alongside",
+     "body": [
+      "Integration Suite introduces different skills: Cloud Integration flows, API policies, BTP cockpit operations. Plan team enablement as a workstream with budget, not an afterthought. The teams that struggle are the ones whose first day operating the new platform is also their first day using it."
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "event-driven-edi",
+   "title": "Event-Driven EDI: Modernising B2B Document Exchange Without Losing the Plot",
+   "tag": "EDI Modernisation",
+   "date": "2026-02-18",
+   "minutes": 7,
+   "excerpt": "EDI isn't going anywhere — but the batch-oriented, black-box way most organisations run it should. How event-driven patterns make document flows observable, debuggable and dramatically easier to operate.",
+   "sections": [
+    {
+     "heading": "The problem with batch thinking",
+     "body": [
+      "Classic EDI runs in batches: files collected, translated, transmitted on schedules. When something fails, the failure surfaces as an absence — a missing invoice, a partner phone call — hours or days after the cause. Batch isn't wrong, but invisibility is.",
+      "Event-driven EDI keeps the standards (X12, EDIFACT, AS2 all stay) and changes the nervous system. Every state transition in a document's life — received, translated, acknowledged, delivered, failed — publishes an event."
+     ]
+    },
+    {
+     "heading": "What the events buy you",
+     "body": [
+      "First, observability: a live view of every document's position, queryable by partner, type or correlation ID. Second, faster failure response: a failed translation publishes an event that routes to a human with context attached, instead of a log entry nobody reads.",
+      "Third, and most underrated: analytics become trivial. Partner conformance rates, acknowledgement latency, document volumes by route — all of it falls out of the event stream without bespoke reporting projects."
+     ]
+    },
+    {
+     "heading": "Start at the edges",
+     "body": [
+      "You don't need to rebuild the translation engine. Wrap your existing EDI platform — whether it's Boomi, a VAN, or something older — so state changes emit events. Build the dashboard, the alerting and the audit trail first. Once the flow is visible, modernising the components underneath it stops being guesswork."
+     ]
+    }
+   ]
+  }
+ ],
+ "roles": [
+  {
+   "id": "senior-integration-engineer",
+   "title": "Senior Integration Engineer — Dell Boomi",
+   "location": "Remote",
+   "type": "Full-time",
+   "summary": "Own integration delivery end to end for enterprise clients: process design, connector architecture, code review and operational handover. You'll work directly with client architects and set the quality bar for everything we ship.",
+   "musts": [
+    "Deep, hands-on Dell Boomi AtomSphere experience in production environments",
+    "Strong grasp of integration patterns: messaging, transformation, error handling, idempotency",
+    "Comfort reading API specs, EDI guidelines and database schemas in the same afternoon",
+    "Clear written communication — our documentation is a deliverable, not an afterthought"
+   ],
+   "status": "published"
+  },
+  {
+   "id": "sap-integration-consultant",
+   "title": "SAP Integration Consultant",
+   "location": "Remote",
+   "type": "Full-time",
+   "summary": "Design and deliver connectivity between SAP landscapes and the wider world — Integration Suite on BTP, iPaaS platforms, and the occasional well-placed IDoc. You'll help clients plan PI/PO transitions with honesty about effort and risk.",
+   "musts": [
+    "Production experience with SAP integration technologies (CPI/Integration Suite, IDoc, OData, RFC)",
+    "Understanding of S/4HANA data models in at least one functional domain",
+    "Ability to explain integration trade-offs to non-technical stakeholders",
+    "Experience working asynchronously in distributed teams"
+   ],
+   "status": "published"
+  },
+  {
+   "id": "fullstack-ai-automation-engineer",
+   "title": "Full-Stack Engineer — AI Automation",
+   "location": "Remote",
+   "type": "Full-time",
+   "summary": "Build the automation layer: pipelines that read documents, agents that summarise operational anomalies, and the evaluation harnesses that tell us whether any of it actually works. Pragmatism over hype, measurement over demos.",
+   "musts": [
+    "Strong software engineering fundamentals in Python and/or TypeScript",
+    "Hands-on experience building with LLM APIs, including evaluation and cost control",
+    "Familiarity with event-driven systems and workflow orchestration",
+    "Healthy scepticism about AI claims — including ours"
+   ],
+   "status": "published"
+  }
+ ],
+ "TOPICS": [
+  "Enterprise integration",
+  "Dell Boomi iPaaS",
+  "SAP connectivity",
+  "B2B EDI & supply chain",
+  "Cloud integration architecture",
+  "API engineering",
+  "AI & intelligent automation",
+  "Technical consulting",
+  "General inquiry"
+ ]
+}

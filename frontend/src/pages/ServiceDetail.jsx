@@ -1,12 +1,14 @@
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Reveal, Eyebrow } from "@/components/Reveal";
-import { services } from "@/data/content";
+import ServiceIcon from "@/components/ServiceIcon";
+import { useServices } from "@/data/useCms";
 import usePageMeta from "@/hooks/usePageMeta";
 import NotFound from "@/pages/NotFound";
 
 const ServiceDetail = () => {
   const { slug } = useParams();
+  const services = useServices();
   const service = services.find((s) => s.slug === slug);
   usePageMeta(service ? service.name : "Service", service?.short);
 
@@ -27,7 +29,7 @@ const ServiceDetail = () => {
             </Link>
             <div className="flex items-center gap-4 mb-6">
               <div className="w-14 h-14 rounded-xl bg-panel border border-cyan-500/30 flex items-center justify-center">
-                <service.icon size={26} className="text-cyanglow" />
+                <ServiceIcon slug={service.slug} size={26} />
               </div>
               <Eyebrow dark>Service · {String(idx + 1).padStart(2, "0")}</Eyebrow>
             </div>
@@ -47,7 +49,7 @@ const ServiceDetail = () => {
               Concrete outputs, not hours billed
             </h2>
             <ul className="mt-8 space-y-4">
-              {service.deliverables.map((d) => (
+              {(service.deliverables || []).map((d) => (
                 <li key={d} className="flex gap-3 text-sm sm:text-base leading-relaxed text-slate-700">
                   <CheckCircle2 size={18} className="text-cyanglow shrink-0 mt-0.5" />
                   {d}
@@ -62,7 +64,7 @@ const ServiceDetail = () => {
               The same four moves, every time
             </h2>
             <ol className="mt-8 space-y-6">
-              {service.approach.map((a, i) => (
+              {(service.approach || []).map((a, i) => (
                 <li key={a.title} className="rounded-2xl border border-hairline bg-[#FAFAFA] p-6" data-testid={`approach-step-${i}`}>
                   <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-electric">
                     Step {String(i + 1).padStart(2, "0")} · {a.title}
@@ -79,7 +81,7 @@ const ServiceDetail = () => {
             <div className="rounded-2xl border border-hairline bg-white p-8">
               <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-500 mb-4">Typical stack &amp; standards</p>
               <div className="flex flex-wrap gap-2.5" data-testid="service-stack-chips">
-                {service.stack.map((t) => (
+                {(service.stack || []).map((t) => (
                   <span key={t} className="font-mono text-xs px-3.5 py-1.5 rounded-full bg-slate-900 text-cyan-300">
                     {t}
                   </span>
