@@ -6,6 +6,7 @@ load_dotenv(ROOT_DIR / '.env')
 
 from fastapi import FastAPI, APIRouter, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr
 from html import escape
@@ -19,6 +20,8 @@ import time
 import ipaddress
 import logging
 import uuid
+import csv
+import io
 import httpx
 import bcrypt
 import jwt
@@ -80,9 +83,8 @@ async def seed_admin():
             "created_at": datetime.now(timezone.utc).isoformat(),
         })
         logger.info("Admin user seeded")
-    elif not verify_password(admin_password, existing["password_hash"]):
-        await db.users.update_one({"email": admin_email}, {"$set": {"password_hash": hash_password(admin_password)}})
-        logger.info("Admin password reconciled with env")
+    # No password reconciliation: the admin changes their password in-app,
+    # so the env value only applies to the very first seed.
 
 
 @app.on_event("startup")
@@ -237,6 +239,11 @@ class LoginIn(BaseModel):
 
 class ReadIn(BaseModel):
     read: bool
+
+
+class ChangePasswordIn(BaseModel):
+    current_password: str = Field(min_length=1, max_length=200)
+    new_password: str = Field(min_length=10, max_length=200)
 
 
 class PageviewIn(BaseModel):
@@ -406,6 +413,17 @@ async def me(admin=Depends(get_current_admin)):
     return admin
 
 
+@api_router.post("/auth/change-password")
+async def change_password(payload: ChangePasswordIn, request: Request, admin=Depends(get_current_admin)):
+    _throttle(f"pw:{request.client.host if request.client else 'unknown'}", limit=10, window=600)
+    user = await db.users.find_one({"email": admin["email"]})
+    if not user or not verify_password(payload.current_password, user["password_hash"]):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    await db.users.update_one({"id": user["id"]}, {"$set": {"password_hash": hash_password(payload.new_password)}})
+    logger.info("Admin password changed in-app")
+    return {"status": "password_updated"}
+
+
 # ---- Admin routes ----
 _KIND_TO_COLLECTION = {"contact": "contact_submissions", "careers": "career_applications"}
 
@@ -429,6 +447,36 @@ async def mark_read(kind: str, sid: str, payload: ReadIn, admin=Depends(get_curr
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Submission not found")
     return {"status": "ok"}
+
+
+@api_router.delete("/admin/submissions/{kind}/{sid}")
+async def delete_submission(kind: str, sid: str, admin=Depends(get_current_admin)):
+    coll_name = _KIND_TO_COLLECTION.get(kind)
+    if not coll_name:
+        raise HTTPException(status_code=400, detail="kind must be 'contact' or 'careers'")
+    result = await db[coll_name].delete_one({"id": sid})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    return {"status": "deleted"}
+
+
+@api_router.get("/admin/submissions/export")
+async def export_submissions(kind: str = "contact", admin=Depends(get_current_admin)):
+    coll_name = _KIND_TO_COLLECTION.get(kind)
+    if not coll_name:
+        raise HTTPException(status_code=400, detail="kind must be 'contact' or 'careers'")
+    docs = await db[coll_name].find({}, {"_id": 0}).sort("created_at", -1).to_list(5000)
+    buf = io.StringIO()
+    fields = ["id", "created_at", "name", "email", "company", "topic", "role", "linkedin", "message", "read"]
+    writer = csv.DictWriter(buf, fieldnames=fields, extrasaction="ignore")
+    writer.writeheader()
+    for d in docs:
+        writer.writerow(d)
+    return Response(
+        buf.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="autraxis-{kind}-submissions.csv"'},
+    )
 
 
 @api_router.get("/admin/analytics")

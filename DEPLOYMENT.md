@@ -24,7 +24,7 @@ No Zoho Mail configuration existed in this codebase, and this project does not t
 ## Backend setup still required / known limitations
 - The per-app email key must be present in the deployed environment (platform-provisioned in Emergent).
 - Form spam protection is a honeypot + per-IP rate limit (6 submissions / 10 min). Add CAPTCHA if abuse appears.
-- Submissions live in MongoDB collections `contact_submissions` and `career_applications`. There is no admin UI yet — query the DB or export as needed.
+- Submissions live in MongoDB collections `contact_submissions` and `career_applications`, viewable in the admin inbox at /admin (read/unread, delete, CSV export). The admin password is changed in the inbox's Settings tab; `ADMIN_PASSWORD` in the env only applies to the very first seed.
 - No analytics are installed. If you add any (e.g., a privacy-friendly option like Plausible), update the Privacy Policy accordingly.
 
 ## Legal / configuration items to resolve before launch
